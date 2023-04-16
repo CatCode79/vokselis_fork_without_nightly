@@ -1,2 +1,2 @@
 # invoke-bonsai
-Example from the repo vokselis
+Bonsai example from the repo vokselis
