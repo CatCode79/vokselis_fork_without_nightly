@@ -60,11 +60,15 @@ impl Context {
     pub async fn new(window: &Window, camera: Option<Camera>) -> Result<Self> {
         // Create new instance using first-tier backend of WGPU
         // One of Vulkan + Metal + DX12 + Browser WebGPU
-        let instance = wgpu::Instance::new(wgpu::Backends::PRIMARY);
+        let instance_desc = wgpu::InstanceDescriptor {
+            backends: wgpu::Backends::PRIMARY,
+            dx12_shader_compiler: Default::default(),
+        };
+        let instance = wgpu::Instance::new(instance_desc);
 
         // Create a `surface` represents a platform-specific window
         // onto which rendered images may be presented
-        let surface = unsafe { instance.create_surface(&window) };
+        let surface = unsafe { instance.create_surface(&window) }.unwrap();
 
         // Get a handle to a physical device
         let adapter: wgpu::Adapter = instance
@@ -102,6 +106,7 @@ impl Context {
             height,
             present_mode: wgpu::PresentMode::Fifo,
             alpha_mode: wgpu::CompositeAlphaMode::Auto,
+            view_formats: vec![],
         };
         surface.configure(&device, &surface_config);
 
@@ -317,6 +322,7 @@ fn create_rgb_framebuffer(
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
+        view_formats: &[],
     };
 
     device.create_texture(multisampled_frame_descriptor)

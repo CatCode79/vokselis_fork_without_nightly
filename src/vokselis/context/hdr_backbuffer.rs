@@ -56,6 +56,7 @@ impl HdrBackBuffer {
                 | wgpu::TextureUsages::STORAGE_BINDING
                 | wgpu::TextureUsages::TEXTURE_BINDING
                 | wgpu::TextureUsages::COPY_SRC,
+            view_formats: &[],
         });
         let texture_view = texture.create_view(&Default::default());
 

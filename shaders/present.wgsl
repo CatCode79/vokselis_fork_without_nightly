@@ -110,11 +110,11 @@ struct FragmentOutput {
 
 @fragment
 fn fs_main(vin: VertexOutput) -> FragmentOutput {
-    let col = tex_sample(src_texture, vin.uv);
-    // let col = texture_quadratic(src_texture, vin.uv);
-    // let col = texture_bicubic(src_texture, vin.uv);
-    let col = vec4(ACESFilm(col.rgb), col.a);
-    let col = linear_to_srgb(col);
+    let col_tex = tex_sample(src_texture, vin.uv);
+    // let col_tex = texture_quadratic(src_texture, vin.uv);
+    // let col_tex = texture_bicubic(src_texture, vin.uv);
+    let col_vec = vec4(ACESFilm(col_tex.rgb), col_tex.a);
+    let col = linear_to_srgb(col_vec);
     return FragmentOutput(col, col);
 }
 

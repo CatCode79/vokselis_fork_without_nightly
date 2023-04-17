@@ -44,6 +44,7 @@ impl VolumeTexture {
             dimension: wgpu::TextureDimension::D3,
             format: wgpu::TextureFormat::R8Unorm,
             usage: wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::TEXTURE_BINDING,
+            view_formats: &[],
         });
         let texture_view = texture.create_view(&Default::default());
 

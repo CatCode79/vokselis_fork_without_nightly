@@ -67,7 +67,7 @@ fn linear_to_srgb(x: f32) -> f32 {
     return 1.055 * pow(x, 1.0 / 2.4) - 0.055;
 }
 
-let TAU: f32 = 6.28318;
+const TAU: f32 = 6.28318;
 fn palette(t: f32, a: float3, b: float3, c: float3, d: float3) -> float3 {
     return a + b * cos(TAU * (c * t + d));
 }
