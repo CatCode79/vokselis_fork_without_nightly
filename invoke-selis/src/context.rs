@@ -1,4 +1,4 @@
-use std::{rc::Rc, sync::Arc, time::Instant};
+use std::{sync::Arc, time::Instant};
 
 use color_eyre::eyre::{eyre, Result};
 use winit::{dpi::PhysicalSize, window::Window};
@@ -24,8 +24,6 @@ use crate::utils::frame_counter::FrameCounter;
 use crate::utils::input::Input;
 use crate::utils::ImageDimensions;
 use crate::{Camera, CameraBinding};
-
-pub type PipelineHandle<T> = Rc<T>;
 
 pub struct Context {
     adapter: wgpu::Adapter,

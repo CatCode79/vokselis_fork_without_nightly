@@ -1,10 +1,10 @@
 [package]
-name = "invoke-bonsai"
+name = "invoke-xor"
 version = "0.1.0"
 edition = "2021"
 authors = ["Alex Komissarov <k.a.komissar@gmail.com>"]
 license = "MIT"
-description = "Bonsai example from the repo Vokselis."
+description = "Xor example from the repo Vokselis."
 repository = "https://github.com/pudnax/vokselis/"
 readme = "README.md"
 keywords = ["graphics", "voxels", "wgpu", "shaders", "creative"]

@@ -56,7 +56,7 @@ mod utils;
 
 pub use camera::{Camera, CameraBinding};
 pub use context::{
-    Context, GlobalUniformBinding, HdrBackBuffer, PipelineHandle, Uniform, VolumeTexture,
+    Context, GlobalUniformBinding, HdrBackBuffer, Uniform, VolumeTexture,
 };
 pub use utils::{dispatch_optimal, NonZeroSized};
 
