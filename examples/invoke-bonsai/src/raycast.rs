@@ -1,15 +1,15 @@
 use wgpu::util::DeviceExt;
 
-use crate::{CameraBinding, GlobalUniformBinding, HdrBackBuffer, Uniform};
+use invoke_selis::{CameraBinding, GlobalUniformBinding, HdrBackBuffer, Uniform};
 
-pub struct RaycastPipeline {
-    pub pipeline: wgpu::RenderPipeline,
+pub(crate) struct RaycastPipeline {
+    pub(crate) pipeline: wgpu::RenderPipeline,
     vertex_buffer: wgpu::Buffer,
     vertex_count: usize,
 }
 
 impl RaycastPipeline {
-    pub fn new_with_module(
+    pub(crate) fn new_with_module(
         device: &wgpu::Device,
         module_desc: wgpu::ShaderModuleDescriptor<'_>,
     ) -> Self {
@@ -74,7 +74,7 @@ impl RaycastPipeline {
             fragment: Some(wgpu::FragmentState {
                 module,
                 entry_point: "fs_main",
-                targets: &[Some(wgpu::ColorTargetState{
+                targets: &[Some(wgpu::ColorTargetState {
                     format: HdrBackBuffer::FORMAT,
                     blend: None,
                     write_mask: Default::default(),
@@ -102,7 +102,7 @@ impl RaycastPipeline {
 }
 
 impl<'a> RaycastPipeline {
-    pub fn record<'pass>(
+    pub(crate) fn record<'pass>(
         &'a self,
         rpass: &mut wgpu::RenderPass<'pass>,
         uniform_bind_group: &'a GlobalUniformBinding,

@@ -1,29 +1,29 @@
 use std::num::NonZeroU32;
 
-use crate::vokselis::utils::ImageDimentions;
+use crate::utils::ImageDimensions;
 
-pub struct ScreenshotCtx {
-    pub image_dimentions: ImageDimentions,
+pub(crate) struct ScreenshotCtx {
+    pub(crate) image_dimentions: ImageDimensions,
     data: wgpu::Buffer,
 }
 
 impl ScreenshotCtx {
-    pub fn resize(&mut self, device: &wgpu::Device, width: u32, height: u32) {
+    pub(crate) fn resize(&mut self, device: &wgpu::Device, width: u32, height: u32) {
         // puffin::profile_function!();
-        let new_dims = ImageDimentions::new(width, height, wgpu::COPY_BYTES_PER_ROW_ALIGNMENT);
+        let new_dims = ImageDimensions::new(width, height, wgpu::COPY_BYTES_PER_ROW_ALIGNMENT);
         if new_dims.linear_size() > self.image_dimentions.linear_size() {
             // puffin::profile_scope!("Reallocating Buffer");
             let image_dimentions =
-                ImageDimentions::new(width, height, wgpu::COPY_BYTES_PER_ROW_ALIGNMENT);
+                ImageDimensions::new(width, height, wgpu::COPY_BYTES_PER_ROW_ALIGNMENT);
 
             self.data = create_host_buffer(device, &image_dimentions);
         }
         self.image_dimentions = new_dims;
     }
 
-    pub fn new(device: &wgpu::Device, width: u32, height: u32) -> Self {
+    pub(crate) fn new(device: &wgpu::Device, width: u32, height: u32) -> Self {
         let image_dimentions =
-            ImageDimentions::new(width, height, wgpu::COPY_BYTES_PER_ROW_ALIGNMENT);
+            ImageDimensions::new(width, height, wgpu::COPY_BYTES_PER_ROW_ALIGNMENT);
 
         let data = create_host_buffer(device, &image_dimentions);
 
@@ -33,12 +33,12 @@ impl ScreenshotCtx {
         }
     }
 
-    pub fn capture_frame(
+    pub(crate) fn capture_frame(
         &self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         src_texture: &wgpu::Texture,
-    ) -> (Vec<u8>, ImageDimentions) {
+    ) -> (Vec<u8>, ImageDimensions) {
         // puffin::profile_function!();
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Capture Encoder"),
@@ -76,7 +76,7 @@ impl ScreenshotCtx {
     }
 }
 
-fn create_host_buffer(device: &wgpu::Device, image_dimentions: &ImageDimentions) -> wgpu::Buffer {
+fn create_host_buffer(device: &wgpu::Device, image_dimentions: &ImageDimensions) -> wgpu::Buffer {
     device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("Screenshot Buffer"),
         size: image_dimentions.linear_size(),

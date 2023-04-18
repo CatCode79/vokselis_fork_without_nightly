@@ -1,13 +1,13 @@
 use crate::{GlobalUniformBinding, Uniform};
 
-pub struct PresentPipeline {
-    pub pipeline: wgpu::RenderPipeline,
+pub(crate) struct PresentPipeline {
+    pub(crate) pipeline: wgpu::RenderPipeline,
     _surface_format: wgpu::TextureFormat,
     sampler_bind_group: wgpu::BindGroup,
 }
 
 impl PresentPipeline {
-    pub fn new_with_module(
+    pub(crate) fn new_with_module(
         device: &wgpu::Device,
         surface_format: wgpu::TextureFormat,
         module_desc: wgpu::ShaderModuleDescriptor<'_>,
@@ -108,7 +108,7 @@ impl PresentPipeline {
 }
 
 impl<'a> PresentPipeline {
-    pub fn record<'pass>(
+    pub(crate) fn record<'pass>(
         &'a self,
         rpass: &mut wgpu::RenderPass<'pass>,
         uniform_bind_group: &'a GlobalUniformBinding,

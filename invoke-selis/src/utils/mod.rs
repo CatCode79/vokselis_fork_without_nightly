@@ -7,16 +7,16 @@ use std::{
     path::Path,
 };
 
-pub mod frame_counter;
-pub mod input;
-pub mod recorder;
+pub(crate) mod frame_counter;
+pub(crate) mod input;
+pub(crate) mod recorder;
 
 pub fn dispatch_optimal(len: u32, subgroup_size: u32) -> u32 {
     let padded_size = (subgroup_size - len % subgroup_size) % subgroup_size;
     (len + padded_size) / subgroup_size
 }
 
-pub fn create_folder<P: AsRef<Path>>(name: P) -> io::Result<()> {
+pub(crate) fn create_folder<P: AsRef<Path>>(name: P) -> io::Result<()> {
     match std::fs::create_dir(name) {
         Ok(_) => {}
         Err(e) if e.kind() == io::ErrorKind::AlreadyExists => {}
@@ -34,7 +34,7 @@ impl<T> NonZeroSized for T where T: Sized {}
 
 /// A hash map with a [HashSet](std::collections::HashSet) to hold unique values
 #[derive(Debug)]
-pub struct ContiniousHashMap<K, V>(HashMap<K, Vec<V>>);
+pub(crate) struct ContiniousHashMap<K, V>(HashMap<K, Vec<V>>);
 
 impl<K, V> Deref for ContiniousHashMap<K, V> {
     type Target = HashMap<K, Vec<V>>;
@@ -55,7 +55,7 @@ impl<K, V> ContiniousHashMap<K, V> {
     /// The hash map is initially created with a capacity of 0,
     /// so it will not allocate until it is first inserted into.
     #[allow(unused)]
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self::default()
     }
 }
@@ -66,7 +66,7 @@ impl<K: Eq + Hash, V> ContiniousHashMap<K, V> {
     /// If the mep already contain this key this method will add
     /// a value instead of rewriting an old value.
     #[allow(unused)]
-    pub fn push_value(&mut self, key: K, value: V) {
+    pub(crate) fn push_value(&mut self, key: K, value: V) {
         self.0.entry(key).or_insert_with(Vec::new).push(value);
     }
 }
@@ -78,14 +78,14 @@ impl<K, V> Default for ContiniousHashMap<K, V> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct ImageDimentions {
+pub struct ImageDimensions {
     pub width: u32,
     pub height: u32,
     pub unpadded_bytes_per_row: u32,
     pub padded_bytes_per_row: u32,
 }
 
-impl ImageDimentions {
+impl ImageDimensions {
     pub fn new(width: u32, height: u32, align: u32) -> Self {
         let height = height.saturating_sub(height % 2);
         let width = width.saturating_sub(width % 2);

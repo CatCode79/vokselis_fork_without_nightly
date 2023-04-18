@@ -35,9 +35,9 @@ var<storage> dyn_offset: Offset;
 var<private> tmin: f32 = 0.;
 var<private> tmax: f32 = 0.;
 
-let NUM_STEPS: i32 = 100;
-let MIN_DIST: f32 = 0.0;
-let MAX_DIST: f32 = 5.0;
+const NUM_STEPS: i32 = 100;
+const MIN_DIST: f32 = 0.0;
+const MAX_DIST: f32 = 5.0;
 
 fn intersect_box(orig: vec3<f32>, dir: vec3<f32>) -> vec2<f32> {
     let box_min = vec3(-1.0);
@@ -85,8 +85,8 @@ fn get_col2(eye: vec3<f32>, dir: vec3<f32>, tmin: f32, tmax: f32, clear_color: v
         let bottom_light = 0.9 * clamp(0.5 - 0.5 * normal.y, 0., 1.);
         shade = mix(shade, bottom_light * vec3(0., 0., 0.6), 0.2);
 
-        let tmp = color.rgb + (1.0 - color.a) * vol_alpha * vol_color * shade;
-        let tmp = tmp + clear_color.rgb * clear_color.a * (1.0 - vol_alpha);
+        var tmp = color.rgb + (1.0 - color.a) * vol_alpha * vol_color * shade;
+        tmp += clear_color.rgb * clear_color.a * (1.0 - vol_alpha);
         color = vec4(tmp, color.a);
         color.a = color.a + (1.0 - color.a) * vol_alpha * (1. - clear_color.a);
         if (color.a >= 0.95) {

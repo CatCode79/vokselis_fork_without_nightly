@@ -1,5 +1,5 @@
-use color_eyre::eyre::Result;
-use crossbeam_channel::{Receiver, Sender};
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 use std::{
     fs::File,
     io::{BufWriter, Write},
@@ -8,28 +8,29 @@ use std::{
     time::Instant,
 };
 
-use crate::vokselis::utils::create_folder;
-use crate::vokselis::{SCREENSHOTS_FOLDER, VIDEO_FOLDER};
-#[cfg(windows)]
-use std::os::windows::process::CommandExt;
+use color_eyre::eyre::Result;
+use crossbeam_channel::{Receiver, Sender};
 
-use super::ImageDimentions;
+use crate::utils::create_folder;
+use crate::{SCREENSHOTS_FOLDER, VIDEO_FOLDER};
 
-pub enum RecordEvent {
-    Start(ImageDimentions),
+use super::ImageDimensions;
+
+pub(crate) enum RecordEvent {
+    Start(ImageDimensions),
     Record(Vec<u8>),
     Finish,
-    Screenshot((Vec<u8>, ImageDimentions)),
+    Screenshot((Vec<u8>, ImageDimensions)),
 }
 
-pub struct Recorder {
+pub(crate) struct Recorder {
     sender: Sender<RecordEvent>,
     ffmpeg_installed: bool,
-    pub ffmpeg_version: String,
+    pub(crate) ffmpeg_version: String,
 }
 
 impl Recorder {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         let mut command = Command::new("ffmpeg");
         command.arg("-version");
         let (version, installed) = match command.output() {
@@ -55,11 +56,11 @@ impl Recorder {
         }
     }
 
-    pub fn ffmpeg_installed(&self) -> bool {
+    pub(crate) fn ffmpeg_installed(&self) -> bool {
         self.ffmpeg_installed
     }
 
-    pub fn send(&self, event: RecordEvent) {
+    pub(crate) fn send(&self, event: RecordEvent) {
         if matches!(
             event,
             RecordEvent::Finish | RecordEvent::Start(_) | RecordEvent::Record(_)
@@ -73,10 +74,10 @@ impl Recorder {
 
 struct RecorderThread {
     process: Child,
-    image_dimentions: ImageDimentions,
+    image_dimentions: ImageDimensions,
 }
 
-fn new_ffmpeg_command(image_dimentions: ImageDimentions, filename: &str) -> Result<RecorderThread> {
+fn new_ffmpeg_command(image_dimentions: ImageDimensions, filename: &str) -> Result<RecorderThread> {
     #[rustfmt::skip]
     let args = [
         "-framerate", "60",
@@ -186,7 +187,7 @@ fn record_thread(rx: Receiver<RecordEvent>) {
     }
 }
 
-pub fn save_screenshot(frame: Vec<u8>, image_dimentions: ImageDimentions) -> Result<()> {
+pub(crate) fn save_screenshot(frame: Vec<u8>, image_dimentions: ImageDimensions) -> Result<()> {
     let now = Instant::now();
     let screenshots_folder = Path::new(SCREENSHOTS_FOLDER);
     create_folder(screenshots_folder)?;
@@ -196,8 +197,7 @@ pub fn save_screenshot(frame: Vec<u8>, image_dimentions: ImageDimentions) -> Res
     ));
     let file = File::create(path)?;
     let w = BufWriter::new(file);
-    let mut encoder =
-        png::Encoder::new(w, image_dimentions.width, image_dimentions.height);
+    let mut encoder = png::Encoder::new(w, image_dimentions.width, image_dimentions.height);
     encoder.set_color(png::ColorType::Rgba);
     encoder.set_depth(png::BitDepth::Eight);
     let padded_bytes = image_dimentions.padded_bytes_per_row as _;

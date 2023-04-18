@@ -1,6 +1,7 @@
-use crate::NonZeroSized;
 use glam::{Mat4, Vec3};
 use wgpu::util::DeviceExt;
+
+use crate::NonZeroSized;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]

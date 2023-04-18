@@ -20,9 +20,9 @@ pub use volume_texture::VolumeTexture;
 
 use screenshot::ScreenshotCtx;
 
-use crate::vokselis::utils::frame_counter::FrameCounter;
-use crate::vokselis::utils::input::Input;
-use crate::vokselis::utils::ImageDimentions;
+use crate::utils::frame_counter::FrameCounter;
+use crate::utils::input::Input;
+use crate::utils::ImageDimensions;
 use crate::{Camera, CameraBinding};
 
 pub type PipelineHandle<T> = Rc<T>;
@@ -275,12 +275,12 @@ impl Context {
         Ok(())
     }
 
-    pub fn capture_frame(&self) -> (Vec<u8>, ImageDimentions) {
+    pub fn capture_frame(&self) -> (Vec<u8>, ImageDimensions) {
         self.screenshot_ctx
             .capture_frame(&self.device, &self.queue, &self.rgb_texture)
     }
 
-    pub fn capture_image_dimentions(&self) -> ImageDimentions {
+    pub fn capture_image_dimentions(&self) -> ImageDimensions {
         self.screenshot_ctx.image_dimentions
     }
 }

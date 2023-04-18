@@ -1,5 +1,5 @@
 [package]
-name = "invoke-bonsai"
+name = "invoke-selis"
 version = "0.1.0"
 edition = "2021"
 authors = ["Alex Komissarov <k.a.komissar@gmail.com>"]
@@ -11,13 +11,15 @@ keywords = ["graphics", "voxels", "wgpu", "shaders", "creative"]
 exclude = [".gitignore", "examples", ".github"]
 categories = ["graphics", "rendering"]
 
+[lib]
+
 [dependencies]
 bytemuck = { version = "1.7", features = ["derive"] }
 chrono = "0.4"
 color-eyre = "0.6"
 crossbeam-channel = "0.5"
-glam = { version = "0.23", features = ["bytemuck"] }
 env_logger = "0.10"
+glam = { version = "0.23", features = ["bytemuck"] }
 png = "0.17"
 pollster = "0.3"
 wgpu = "0.15"
