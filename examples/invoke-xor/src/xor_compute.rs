@@ -2,16 +2,16 @@ use invoke_selis::{
     GlobalUniformBinding, Uniform,
 };
 
-pub struct XorCompute {
+pub(crate) struct XorCompute {
     pipeline: wgpu::ComputePipeline,
     _xor_texture: wgpu::Texture,
     _normal_texture: wgpu::Texture,
-    pub storage_bind_group: wgpu::BindGroup,
-    pub render_bind_group: wgpu::BindGroup,
+    pub(crate) storage_bind_group: wgpu::BindGroup,
+    pub(crate) render_bind_group: wgpu::BindGroup,
 }
 
 impl XorCompute {
-    pub const DESC_COMPUTE: wgpu::BindGroupLayoutDescriptor<'static> =
+    pub(crate) const DESC_COMPUTE: wgpu::BindGroupLayoutDescriptor<'static> =
         wgpu::BindGroupLayoutDescriptor {
             label: Some("Compute Storage Texture Layout"),
             entries: &[
@@ -37,7 +37,7 @@ impl XorCompute {
                 },
             ],
         };
-    pub const DESC_RENDER: wgpu::BindGroupLayoutDescriptor<'static> =
+    pub(crate) const DESC_RENDER: wgpu::BindGroupLayoutDescriptor<'static> =
         wgpu::BindGroupLayoutDescriptor {
             label: Some("Render Storage Texture Layout"),
             entries: &[
@@ -73,7 +73,7 @@ impl XorCompute {
             ],
         };
 
-    pub fn new_with_module(
+    pub(crate) fn new_with_module(
         device: &wgpu::Device,
         module_desc: wgpu::ShaderModuleDescriptor<'_>,
     ) -> Self {
@@ -174,7 +174,7 @@ impl XorCompute {
 }
 
 impl<'a> XorCompute {
-    pub fn record<'pass>(
+    pub(crate) fn record<'pass>(
         &'a self,
         cpass: &mut wgpu::ComputePass<'pass>,
         uniform_bind_group: &'a GlobalUniformBinding,

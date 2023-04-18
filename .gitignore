@@ -3,10 +3,8 @@ invoke-selis/target/
 invoke-selis/Cargo.lock
 
 examples/invoke-bonsai/target/
-examples/invoke-bonsai/Cargo.lock
 
 examples/invoke-xor/target/
-examples/invoke-xor/Cargo.lock
 
 **/*.rs.bk
 .git

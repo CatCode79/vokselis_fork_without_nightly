@@ -55,9 +55,7 @@ pub mod context;
 mod utils;
 
 pub use camera::{Camera, CameraBinding};
-pub use context::{
-    Context, GlobalUniformBinding, HdrBackBuffer, Uniform, VolumeTexture,
-};
+pub use context::{Context, GlobalUniformBinding, HdrBackBuffer, Uniform, VolumeTexture};
 pub use utils::{dispatch_optimal, NonZeroSized};
 
 use color_eyre::eyre::Result;

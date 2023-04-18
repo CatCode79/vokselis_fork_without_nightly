@@ -1,4 +1,4 @@
-use wgpu::util::DeviceExt;
+use wgpu::util::DeviceExt as _;
 
 use invoke_selis::{CameraBinding, GlobalUniformBinding, HdrBackBuffer, Uniform};
 

@@ -1,0 +1,19 @@
+[package]
+name = "invoke-triangle"
+version = "0.1.0"
+edition = "2021"
+authors = ["Alex Komissarov <k.a.komissar@gmail.com>"]
+license = "MIT"
+description = "Triangle example from the repo Vokselis."
+repository = "https://github.com/pudnax/vokselis/"
+readme = "README.md"
+keywords = ["graphics", "voxels", "wgpu", "shaders", "creative"]
+exclude = [".gitignore", "examples", ".github"]
+categories = ["graphics", "rendering"]
+
+[dependencies]
+invoke-selis = { path = "../../invoke-selis" }
+
+color-eyre = "0.6"
+wgpu = "0.15"
+winit = "0.28"

@@ -6,13 +6,13 @@ use invoke_selis::{
 
 use crate::xor_compute;
 
-pub struct RaycastPipeline {
-    pub pipeline: wgpu::ComputePipeline,
+pub(crate) struct RaycastPipeline {
+    pub(crate) pipeline: wgpu::ComputePipeline,
     _entry_point: String,
 }
 
 impl RaycastPipeline {
-    pub const OFFSET_BUFFER_DESC: wgpu::BindGroupLayoutDescriptor<'static> =
+    pub(crate) const OFFSET_BUFFER_DESC: wgpu::BindGroupLayoutDescriptor<'static> =
         wgpu::BindGroupLayoutDescriptor {
             label: Some("Offset Buffer Bind Group Layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
@@ -27,7 +27,7 @@ impl RaycastPipeline {
             }],
         };
 
-    pub fn new_with_module(
+    pub(crate) fn new_with_module(
         device: &wgpu::Device,
         module_desc: wgpu::ShaderModuleDescriptor<'_>,
         entry_point: &str,

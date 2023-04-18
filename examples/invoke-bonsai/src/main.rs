@@ -50,7 +50,6 @@ mod raycast;
 use std::path::PathBuf;
 
 use color_eyre::eyre::Result;
-use wgpu::include_wgsl;
 use winit::{dpi::LogicalSize, event_loop::EventLoopBuilder, window::WindowBuilder};
 
 use invoke_selis::{run, Camera, Context, Demo, VolumeTexture};
@@ -64,7 +63,7 @@ struct Bonsai {
 impl Demo for Bonsai {
     fn init(ctx: &mut Context) -> Self {
         let volume_texture = VolumeTexture::new(&ctx.device, &ctx.queue);
-        let shader_module_desc = include_wgsl!("../../../shaders/raycast_naive.wgsl");
+        let shader_module_desc = wgpu::include_wgsl!("../../../shaders/raycast_naive.wgsl");
         let pipeline = RaycastPipeline::new_with_module(&ctx.device, shader_module_desc);
         Self {
             volume_texture,
