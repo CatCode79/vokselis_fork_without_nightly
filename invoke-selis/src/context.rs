@@ -167,6 +167,7 @@ impl Context {
             screen_format: self.surface_config.format,
         }
     }
+
     fn get_vendor_name(&self) -> &str {
         match self.adapter.get_info().vendor {
             0x1002 => "AMD",
@@ -178,6 +179,7 @@ impl Context {
             _ => "Unknown vendor",
         }
     }
+
     fn get_backend(&self) -> &str {
         match self.adapter.get_info().backend {
             wgpu::Backend::Empty => "Empty",
@@ -189,6 +191,7 @@ impl Context {
             wgpu::Backend::BrowserWebGpu => "Browser WGPU",
         }
     }
+
     fn get_device_type(&self) -> &str {
         match self.adapter.get_info().device_type {
             wgpu::DeviceType::Other => "Other",

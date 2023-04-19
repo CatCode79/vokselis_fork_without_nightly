@@ -7,7 +7,7 @@ pub(crate) struct XorCompute {
     _xor_texture: wgpu::Texture,
     _normal_texture: wgpu::Texture,
     pub(crate) storage_bind_group: wgpu::BindGroup,
-    pub(crate) render_bind_group: wgpu::BindGroup,
+    pub(crate) _render_bind_group: wgpu::BindGroup,
 }
 
 impl XorCompute {
@@ -152,7 +152,7 @@ impl XorCompute {
             _xor_texture: xor_texture,
             _normal_texture: normal_texture,
             storage_bind_group,
-            render_bind_group,
+            _render_bind_group: render_bind_group,
         }
     }
 
