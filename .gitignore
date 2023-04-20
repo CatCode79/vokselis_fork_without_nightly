@@ -1,9 +1,8 @@
 invoke-selis/out/
 invoke-selis/target/
-invoke-selis/Cargo.lock
 
 examples/invoke-bonsai/target/
-
+examples/invoke-triangle/target/
 examples/invoke-xor/target/
 
 **/*.rs.bk
