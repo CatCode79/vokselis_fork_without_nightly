@@ -1,5 +1,3 @@
-use std::num::NonZeroU32;
-
 pub struct VolumeTexture {
     pub texture: wgpu::Texture,
     pub bind_group: wgpu::BindGroup,
@@ -53,8 +51,8 @@ impl VolumeTexture {
             data,
             wgpu::ImageDataLayout {
                 offset: 0,
-                bytes_per_row: NonZeroU32::new(256),
-                rows_per_image: NonZeroU32::new(256),
+                bytes_per_row: Some(256),
+                rows_per_image: Some(256),
             },
             size,
         );

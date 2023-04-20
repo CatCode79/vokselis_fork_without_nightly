@@ -22,5 +22,5 @@ env_logger = "0.10"
 glam = { version = "0.23", features = ["bytemuck"] }
 png = "0.17"
 pollster = "0.3"
-wgpu = "0.15"
+wgpu = "0.16"
 winit = "0.28"

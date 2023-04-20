@@ -93,6 +93,7 @@ impl XorCompute {
             view_formats: &[],
         });
         let xor_view = xor_texture.create_view(&Default::default());
+
         let normal_texture = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("XOR Normal Texture"),
             size,

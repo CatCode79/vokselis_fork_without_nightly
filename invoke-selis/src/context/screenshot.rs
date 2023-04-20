@@ -1,5 +1,3 @@
-use std::num::NonZeroU32;
-
 use crate::utils::ImageDimensions;
 
 pub(crate) struct ScreenshotCtx {
@@ -55,9 +53,9 @@ impl ScreenshotCtx {
                 layout: wgpu::ImageDataLayout {
                     offset: 0,
                     bytes_per_row: Some(
-                        NonZeroU32::new(self.image_dimentions.padded_bytes_per_row).unwrap(),
+                        self.image_dimentions.padded_bytes_per_row,
                     ),
-                    rows_per_image: Some(NonZeroU32::new(self.image_dimentions.height).unwrap()),
+                    rows_per_image: Some(self.image_dimentions.height),
                 },
             },
             copy_size,

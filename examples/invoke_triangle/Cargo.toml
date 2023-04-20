@@ -15,5 +15,5 @@ categories = ["graphics", "rendering"]
 invoke-selis = { path = "../../invoke-selis" }
 
 color-eyre = "0.6"
-wgpu = "0.15"
+wgpu = "0.16"
 winit = "0.28"
