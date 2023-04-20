@@ -70,17 +70,17 @@ impl BasicPipeline {
             bind_group_layouts: &[&global_bind_group_layout, &camera_bind_group_layout],
             push_constant_ranges: &[],
         });
-        let shader = device.create_shader_module(module_desc);
+        let module = device.create_shader_module(module_desc);
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Render with Camera Pipeline"),
             layout: Some(&layout),
             fragment: Some(wgpu::FragmentState {
-                module: &shader,
+                module: &module,
                 entry_point: "fs_main",
                 targets: &[Some(surface_format.into())],
             }),
             vertex: wgpu::VertexState {
-                module: &shader,
+                module: &module,
                 entry_point: "vs_main",
                 buffers: &[],
             },

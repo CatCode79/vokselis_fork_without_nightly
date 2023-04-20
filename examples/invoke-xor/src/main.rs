@@ -55,8 +55,7 @@ use color_eyre::eyre::Result;
 use wgpu::util::DeviceExt as _;
 use winit::{dpi::LogicalSize, event_loop::EventLoopBuilder, window::WindowBuilder};
 
-use invoke_selis::{dispatch_optimal, run, Camera, Demo, HdrBackBuffer, Context};
-use wgpu::include_wgsl;
+use invoke_selis::{dispatch_optimal, run, Camera, Context, Demo, HdrBackBuffer};
 
 const TILE_SIZE: u32 = 256;
 
@@ -67,7 +66,7 @@ enum Mode {
 }
 
 #[repr(C)]
-#[derive(Debug, Pod, Zeroable, Clone, Copy)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct Offset {
     x: f32,
     y: f32,
@@ -97,28 +96,28 @@ struct Xor {
 
 impl Demo for Xor {
     fn init(ctx: &mut Context) -> Self {
-        let shader_module_desc = include_wgsl!("../../../shaders/raycast_compute.wgsl");
-        let raycast_single = raycast::RaycastPipeline::new_with_module(
-            &ctx.device,
-            shader_module_desc,
-            "single",
-        );
+        let raycast_single = {
+            let shader_module_desc = wgpu::include_wgsl!("../../../shaders/raycast_compute.wgsl");
+            raycast::RaycastPipeline::new_with_module(&ctx.device, shader_module_desc, "single")
+        };
 
-        let shader_module_desc = include_wgsl!("../../../shaders/raycast_compute.wgsl");
-        let raycast_tile = raycast::RaycastPipeline::new_with_module(
-            &ctx.device,
-            shader_module_desc,
-            "tile",
-        );
+        let raycast_tile = {
+            let shader_module_desc = wgpu::include_wgsl!("../../../shaders/raycast_compute.wgsl");
+            raycast::RaycastPipeline::new_with_module(&ctx.device, shader_module_desc, "tile")
+        };
 
-        let shader_module_desc = include_wgsl!("../../../shaders/xor.wgsl");
-        let xor_texture = xor_compute::XorCompute::new_with_module(&ctx.device, shader_module_desc);
+        let xor_texture = {
+            let shader_module_desc = wgpu::include_wgsl!("../../../shaders/xor.wgsl");
+            xor_compute::XorCompute::new_with_module(&ctx.device, shader_module_desc)
+        };
 
-        let (w, h) = HdrBackBuffer::DEFAULT_RESOLUTION;
-        let min_align = ctx.limits.min_storage_buffer_offset_alignment;
-        let padding = (min_align - std::mem::size_of::<Offset>() as u32 % min_align) % min_align;
+        let padding = {
+            let min_align = ctx.limits.min_storage_buffer_offset_alignment;
+            (min_align - std::mem::size_of::<Offset>() as u32 % min_align) % min_align
+        };
         let offsets = {
             let mut res = vec![];
+            let (w, h) = HdrBackBuffer::DEFAULT_RESOLUTION;
             for y in 0..((h / TILE_SIZE) + 1) {
                 for x in 0..((w / TILE_SIZE) + 1) {
                     res.extend(bytemuck::bytes_of(&Offset {
@@ -128,34 +127,36 @@ impl Demo for Xor {
                     res.extend(std::iter::repeat(0).take(padding as _));
                 }
             }
-
             res
         };
         let aligned_offset = std::mem::size_of::<Offset>() as u32 + padding;
         let buffer_len = offsets.len() / aligned_offset as usize;
 
-        let offset_buffer = ctx
-            .device
-            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Offsets Buffer"),
-                contents: bytemuck::cast_slice(&offsets),
-                usage: wgpu::BufferUsages::STORAGE,
-            });
-        let offset_buffer_bind_group_layout = ctx
-            .device
-            .create_bind_group_layout(&raycast::RaycastPipeline::OFFSET_BUFFER_DESC);
-        let offset_buffer_bind_group = ctx.device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("Offset Buffer Bind Group"),
-            layout: &offset_buffer_bind_group_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
-                    buffer: &offset_buffer,
-                    offset: 0,
-                    size: wgpu::BufferSize::new(std::mem::size_of::<Offset>() as _),
-                }),
-            }],
-        });
+        let offset_buffer_bind_group = {
+            let offset_buffer = ctx
+                .device
+                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("Offsets Buffer"),
+                    contents: bytemuck::cast_slice(&offsets),
+                    usage: wgpu::BufferUsages::STORAGE,
+                });
+            let offset_buffer_bind_group_layout = ctx
+                .device
+                .create_bind_group_layout(&raycast::RaycastPipeline::OFFSET_BUFFER_DESC);
+            let offset_buffer_bind_group_desc = wgpu::BindGroupDescriptor {
+                label: Some("Offset Buffer Bind Group"),
+                layout: &offset_buffer_bind_group_layout,
+                entries: &[wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                        buffer: &offset_buffer,
+                        offset: 0,
+                        size: wgpu::BufferSize::new(std::mem::size_of::<Offset>() as _),
+                    }),
+                }],
+            };
+            ctx.device.create_bind_group(&offset_buffer_bind_group_desc)
+        };
 
         let timestamp = ctx.device.create_query_set(&wgpu::QuerySetDescriptor {
             label: None,
@@ -166,7 +167,9 @@ impl Demo for Xor {
         let timestamp_buffer = ctx.device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Query Buffer"),
             size: std::mem::size_of::<TimestampData>() as _,
-            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::QUERY_RESOLVE,
+            usage: wgpu::BufferUsages::COPY_DST
+                | wgpu::BufferUsages::MAP_READ
+                | wgpu::BufferUsages::QUERY_RESOLVE,
             mapped_at_creation: false,
         });
 
@@ -270,7 +273,11 @@ impl Demo for Xor {
                 cpass.set_bind_group(3, &ctx.render_backbuffer.storage_bind_group, &[]);
                 cpass.set_bind_group(4, &self.offset_buffer_bind_group, &[0]);
                 let (width, height) = HdrBackBuffer::DEFAULT_RESOLUTION;
-                cpass.dispatch_workgroups(dispatch_optimal(width, 8), dispatch_optimal(height, 8), 1);
+                cpass.dispatch_workgroups(
+                    dispatch_optimal(width, 8),
+                    dispatch_optimal(height, 8),
+                    1,
+                );
             }
             Mode::Tile => {
                 cpass.set_pipeline(&self.raycast_tile.pipeline);

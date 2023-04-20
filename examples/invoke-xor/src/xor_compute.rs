@@ -1,6 +1,4 @@
-use invoke_selis::{
-    GlobalUniformBinding, Uniform,
-};
+use invoke_selis::{GlobalUniformBinding, Uniform};
 
 pub(crate) struct XorCompute {
     pipeline: wgpu::ComputePipeline,
@@ -129,6 +127,7 @@ impl XorCompute {
             min_filter: wgpu::FilterMode::Linear,
             ..Default::default()
         });
+
         let render_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("XOR Render Bind Group"),
             layout: &device.create_bind_group_layout(&Self::DESC_RENDER),
@@ -183,7 +182,6 @@ impl<'a> XorCompute {
         'a: 'pass,
     {
         cpass.set_pipeline(&self.pipeline);
-
         cpass.set_bind_group(0, &uniform_bind_group.binding, &[]);
         cpass.set_bind_group(1, &self.storage_bind_group, &[]);
         cpass.dispatch_workgroups(32, 32, 32);

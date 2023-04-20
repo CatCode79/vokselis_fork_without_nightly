@@ -68,6 +68,7 @@ impl RaycastPipeline {
             ],
             push_constant_ranges: &[],
         });
+
         device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Raycast Pipeline"),
             layout: Some(&layout),
@@ -113,7 +114,6 @@ impl<'a> RaycastPipeline {
     {
         rpass.set_pipeline(&self.pipeline);
         rpass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-
         rpass.set_bind_group(0, &uniform_bind_group.binding, &[]);
         rpass.set_bind_group(1, &camera_bind_group.bind_group, &[]);
         rpass.set_bind_group(2, &volume_texture, &[]);
