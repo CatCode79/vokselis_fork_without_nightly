@@ -27,7 +27,7 @@ impl RaycastPipeline {
             }],
         };
 
-    pub(crate) fn new_with_module(
+    pub(crate) fn new(
         device: &wgpu::Device,
         module_desc: wgpu::ShaderModuleDescriptor<'_>,
         entry_point: &str,

@@ -9,7 +9,7 @@ pub(crate) struct RaycastPipeline {
 }
 
 impl RaycastPipeline {
-    pub(crate) fn new_with_module(
+    pub(crate) fn new(
         device: &wgpu::Device,
         module_desc: wgpu::ShaderModuleDescriptor<'_>,
     ) -> Self {

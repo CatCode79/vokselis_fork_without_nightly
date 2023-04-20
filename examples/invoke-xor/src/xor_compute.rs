@@ -35,6 +35,7 @@ impl XorCompute {
                 },
             ],
         };
+
     pub(crate) const DESC_RENDER: wgpu::BindGroupLayoutDescriptor<'static> =
         wgpu::BindGroupLayoutDescriptor {
             label: Some("Render Storage Texture Layout"),
@@ -71,7 +72,7 @@ impl XorCompute {
             ],
         };
 
-    pub(crate) fn new_with_module(
+    pub(crate) fn new(
         device: &wgpu::Device,
         module_desc: wgpu::ShaderModuleDescriptor<'_>,
     ) -> Self {

@@ -58,7 +58,7 @@ pub struct BasicPipeline {
 }
 
 impl BasicPipeline {
-    pub fn new_with_module(
+    pub fn new(
         device: &wgpu::Device,
         surface_format: wgpu::TextureFormat,
         module_desc: wgpu::ShaderModuleDescriptor<'_>,
@@ -102,7 +102,7 @@ struct BasicTrig {
 
 impl Demo for BasicTrig {
     fn init(ctx: &mut Context) -> Self {
-        let pipeline = BasicPipeline::new_with_module(
+        let pipeline = BasicPipeline::new(
             &ctx.device,
             ctx.render_backbuffer.format(),
             wgpu::include_wgsl!("../../../shaders/shader_with_camera.wgsl"),

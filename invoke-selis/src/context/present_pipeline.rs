@@ -7,7 +7,7 @@ pub(crate) struct PresentPipeline {
 }
 
 impl PresentPipeline {
-    pub(crate) fn new_with_module(
+    pub(crate) fn new(
         device: &wgpu::Device,
         surface_format: wgpu::TextureFormat,
         module_desc: wgpu::ShaderModuleDescriptor<'_>,

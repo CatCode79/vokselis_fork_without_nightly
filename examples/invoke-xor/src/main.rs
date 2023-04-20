@@ -96,19 +96,16 @@ struct Xor {
 
 impl Demo for Xor {
     fn init(ctx: &mut Context) -> Self {
-        let raycast_single = {
-            let shader_module_desc = wgpu::include_wgsl!("../../../shaders/raycast_compute.wgsl");
-            raycast::RaycastPipeline::new_with_module(&ctx.device, shader_module_desc, "single")
-        };
-
-        let raycast_tile = {
-            let shader_module_desc = wgpu::include_wgsl!("../../../shaders/raycast_compute.wgsl");
-            raycast::RaycastPipeline::new_with_module(&ctx.device, shader_module_desc, "tile")
+        let (raycast_single, raycast_tile) = {
+            let module_desc = wgpu::include_wgsl!("../../../shaders/raycast_compute.wgsl");
+            let s = raycast::RaycastPipeline::new(&ctx.device, module_desc.clone(), "single");
+            let t = raycast::RaycastPipeline::new(&ctx.device, module_desc, "tile");
+            (s, t)
         };
 
         let xor_texture = {
             let shader_module_desc = wgpu::include_wgsl!("../../../shaders/xor.wgsl");
-            xor_compute::XorCompute::new_with_module(&ctx.device, shader_module_desc)
+            xor_compute::XorCompute::new(&ctx.device, shader_module_desc)
         };
 
         let padding = {

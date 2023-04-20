@@ -64,7 +64,7 @@ impl Demo for Bonsai {
     fn init(ctx: &mut Context) -> Self {
         let volume_texture = VolumeTexture::new(&ctx.device, &ctx.queue);
         let module_desc = wgpu::include_wgsl!("../../../shaders/raycast_naive.wgsl");
-        let pipeline = RaycastPipeline::new_with_module(&ctx.device, module_desc);
+        let pipeline = RaycastPipeline::new(&ctx.device, module_desc);
         Self {
             volume_texture,
             pipeline,

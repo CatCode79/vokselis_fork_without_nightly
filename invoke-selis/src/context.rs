@@ -122,7 +122,7 @@ impl Context {
 
         let present_shader = wgpu::include_wgsl!("../../shaders/present.wgsl");
         let present_pipeline =
-            PresentPipeline::new_with_module(&device, surface_format, present_shader);
+            PresentPipeline::new(&device, surface_format, present_shader);
 
         Ok(Self {
             camera,
