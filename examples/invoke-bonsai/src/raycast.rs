@@ -22,11 +22,13 @@ impl RaycastPipeline {
             contents: bytemuck::cast_slice::<f32, _>(&vertices),
             usage: wgpu::BufferUsages::VERTEX,
         });
-
         let vertex_count = vertices.len() / 3;
 
-        let module = device.create_shader_module(module_desc);
-        let pipeline = Self::make_pipeline(device, &module);
+        let pipeline = {
+            let module = device.create_shader_module(module_desc);
+            Self::make_pipeline(device, &module)
+        };
+
         Self {
             pipeline,
             vertex_buffer,
@@ -35,39 +37,41 @@ impl RaycastPipeline {
     }
 
     fn make_pipeline(device: &wgpu::Device, module: &wgpu::ShaderModule) -> wgpu::RenderPipeline {
-        let global_bind_group_layout = device.create_bind_group_layout(&Uniform::DESC);
-        let camera_bind_group_layout = device.create_bind_group_layout(&CameraBinding::DESC);
-        let texture_bind_group_layout =
-            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                label: Some("Foot BGL"),
-                entries: &[
-                    wgpu::BindGroupLayoutEntry {
-                        binding: 0,
-                        visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-                        ty: wgpu::BindingType::Texture {
-                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                            view_dimension: wgpu::TextureViewDimension::D3,
-                            multisampled: false,
+        let layout = {
+            let global_bind_group_layout = device.create_bind_group_layout(&Uniform::DESC);
+            let camera_bind_group_layout = device.create_bind_group_layout(&CameraBinding::DESC);
+            let texture_bind_group_layout =
+                device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                    label: Some("Foot BGL"),
+                    entries: &[
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 0,
+                            visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
+                            ty: wgpu::BindingType::Texture {
+                                sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                                view_dimension: wgpu::TextureViewDimension::D3,
+                                multisampled: false,
+                            },
+                            count: None,
                         },
-                        count: None,
-                    },
-                    wgpu::BindGroupLayoutEntry {
-                        binding: 1,
-                        visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
-                        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                        count: None,
-                    },
+                        wgpu::BindGroupLayoutEntry {
+                            binding: 1,
+                            visibility: wgpu::ShaderStages::VERTEX_FRAGMENT,
+                            ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                            count: None,
+                        },
+                    ],
+                });
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("Screen Pass Layout"),
+                bind_group_layouts: &[
+                    &global_bind_group_layout,
+                    &camera_bind_group_layout,
+                    &texture_bind_group_layout,
                 ],
-            });
-        let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("Screen Pass Layout"),
-            bind_group_layouts: &[
-                &global_bind_group_layout,
-                &camera_bind_group_layout,
-                &texture_bind_group_layout,
-            ],
-            push_constant_ranges: &[],
-        });
+                push_constant_ranges: &[],
+            })
+        };
 
         device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Raycast Pipeline"),
@@ -113,6 +117,7 @@ impl<'a> RaycastPipeline {
         'a: 'pass,
     {
         rpass.set_pipeline(&self.pipeline);
+
         rpass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
         rpass.set_bind_group(0, &uniform_bind_group.binding, &[]);
         rpass.set_bind_group(1, &camera_bind_group.bind_group, &[]);

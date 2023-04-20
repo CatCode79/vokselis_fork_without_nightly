@@ -2,8 +2,6 @@ use invoke_selis::{GlobalUniformBinding, Uniform};
 
 pub(crate) struct XorCompute {
     pipeline: wgpu::ComputePipeline,
-    _xor_texture: wgpu::Texture,
-    _normal_texture: wgpu::Texture,
     pub(crate) storage_bind_group: wgpu::BindGroup,
     pub(crate) _render_bind_group: wgpu::BindGroup,
 }
@@ -81,32 +79,40 @@ impl XorCompute {
             height: 256,
             depth_or_array_layers: 256,
         };
-        let xor_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("XOR Texture"),
-            size,
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D3,
-            format: wgpu::TextureFormat::Rgba16Float,
-            usage: wgpu::TextureUsages::STORAGE_BINDING | wgpu::TextureUsages::TEXTURE_BINDING,
-            view_formats: &[],
-        });
-        let xor_view = xor_texture.create_view(&Default::default());
 
-        let normal_texture = device.create_texture(&wgpu::TextureDescriptor {
-            label: Some("XOR Normal Texture"),
-            size,
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D3,
-            format: wgpu::TextureFormat::Rgba16Float,
-            usage: wgpu::TextureUsages::STORAGE_BINDING | wgpu::TextureUsages::TEXTURE_BINDING,
-            view_formats: &[],
-        });
-        let normal_view = normal_texture.create_view(&Default::default());
+        let xor_view = {
+            let xor_texture = device.create_texture(&wgpu::TextureDescriptor {
+                label: Some("XOR Texture"),
+                size,
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: wgpu::TextureDimension::D3,
+                format: wgpu::TextureFormat::Rgba16Float,
+                usage: wgpu::TextureUsages::STORAGE_BINDING | wgpu::TextureUsages::TEXTURE_BINDING,
+                view_formats: &[],
+            });
+            xor_texture.create_view(&Default::default())
+        };
 
-        let module = device.create_shader_module(module_desc);
-        let pipeline = Self::make_pipeline(device, module);
+        let normal_view = {
+            let normal_texture = device.create_texture(&wgpu::TextureDescriptor {
+                label: Some("XOR Normal Texture"),
+                size,
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: wgpu::TextureDimension::D3,
+                format: wgpu::TextureFormat::Rgba16Float,
+                usage: wgpu::TextureUsages::STORAGE_BINDING | wgpu::TextureUsages::TEXTURE_BINDING,
+                view_formats: &[],
+            });
+            normal_texture.create_view(&Default::default())
+        };
+
+        let pipeline = {
+            let module = device.create_shader_module(module_desc);
+            Self::make_pipeline(device, module)
+        };
+
         let storage_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("XOR Compute Bind Group"),
             layout: &device.create_bind_group_layout(&Self::DESC_COMPUTE),
@@ -150,8 +156,6 @@ impl XorCompute {
 
         Self {
             pipeline,
-            _xor_texture: xor_texture,
-            _normal_texture: normal_texture,
             storage_bind_group,
             _render_bind_group: render_bind_group,
         }

@@ -8,7 +8,6 @@ use crate::xor_compute;
 
 pub(crate) struct RaycastPipeline {
     pub(crate) pipeline: wgpu::ComputePipeline,
-    _entry_point: String,
 }
 
 impl RaycastPipeline {
@@ -36,7 +35,6 @@ impl RaycastPipeline {
         let pipeline = Self::make_pipeline(device, module, entry_point);
         Self {
             pipeline,
-            _entry_point: entry_point.to_string(),
         }
     }
 
@@ -45,24 +43,28 @@ impl RaycastPipeline {
         module: wgpu::ShaderModule,
         entry_point: &str,
     ) -> wgpu::ComputePipeline {
-        let global_bind_group_layout = device.create_bind_group_layout(&Uniform::DESC);
-        let camera_bind_group_layout = device.create_bind_group_layout(&CameraBinding::DESC);
-        let volume_bind_group_layout =
-            device.create_bind_group_layout(&xor_compute::XorCompute::DESC_COMPUTE);
-        let output_texture_bind_group_layot =
-            device.create_bind_group_layout(&HdrBackBuffer::DESC_COMPUTE);
-        let offset_buffer_bind_group = device.create_bind_group_layout(&Self::OFFSET_BUFFER_DESC);
-        let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("Compute Raycast Pass Layout"),
-            bind_group_layouts: &[
-                &global_bind_group_layout,
-                &camera_bind_group_layout,
-                &volume_bind_group_layout,
-                &output_texture_bind_group_layot,
-                &offset_buffer_bind_group,
-            ],
-            push_constant_ranges: &[],
-        });
+        let layout = {
+            let global_bind_group_layout = device.create_bind_group_layout(&Uniform::DESC);
+            let camera_bind_group_layout = device.create_bind_group_layout(&CameraBinding::DESC);
+            let volume_bind_group_layout =
+                device.create_bind_group_layout(&xor_compute::XorCompute::DESC_COMPUTE);
+            let output_texture_bind_group_layot =
+                device.create_bind_group_layout(&HdrBackBuffer::DESC_COMPUTE);
+            let offset_buffer_bind_group = device.create_bind_group_layout(&Self::OFFSET_BUFFER_DESC);
+
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("Compute Raycast Pass Layout"),
+                bind_group_layouts: &[
+                    &global_bind_group_layout,
+                    &camera_bind_group_layout,
+                    &volume_bind_group_layout,
+                    &output_texture_bind_group_layot,
+                    &offset_buffer_bind_group,
+                ],
+                push_constant_ranges: &[],
+            })
+        };
+
         device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
             label: Some("Compute Raycast Pipeline"),
             layout: Some(&layout),

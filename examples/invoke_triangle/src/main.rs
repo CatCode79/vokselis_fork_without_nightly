@@ -54,7 +54,6 @@ use invoke_selis::{run, CameraBinding, Context, Demo, Uniform};
 
 pub struct BasicPipeline {
     pub pipeline: wgpu::RenderPipeline,
-    _surface_format: wgpu::TextureFormat,
 }
 
 impl BasicPipeline {
@@ -63,14 +62,17 @@ impl BasicPipeline {
         surface_format: wgpu::TextureFormat,
         module_desc: wgpu::ShaderModuleDescriptor<'_>,
     ) -> Self {
-        let global_bind_group_layout = device.create_bind_group_layout(&Uniform::DESC);
-        let camera_bind_group_layout = device.create_bind_group_layout(&CameraBinding::DESC);
-        let layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("Screen Pass Layout"),
-            bind_group_layouts: &[&global_bind_group_layout, &camera_bind_group_layout],
-            push_constant_ranges: &[],
-        });
+        let layout = {
+            let global_bind_group_layout = device.create_bind_group_layout(&Uniform::DESC);
+            let camera_bind_group_layout = device.create_bind_group_layout(&CameraBinding::DESC);
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("Screen Pass Layout"),
+                bind_group_layouts: &[&global_bind_group_layout, &camera_bind_group_layout],
+                push_constant_ranges: &[],
+            })
+        };
         let module = device.create_shader_module(module_desc);
+
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Render with Camera Pipeline"),
             layout: Some(&layout),
@@ -89,9 +91,9 @@ impl BasicPipeline {
             multisample: wgpu::MultisampleState::default(),
             multiview: None,
         });
+
         Self {
             pipeline,
-            _surface_format: surface_format,
         }
     }
 }
@@ -132,6 +134,7 @@ impl Demo for BasicTrig {
             });
 
             rpass.set_pipeline(&self.pipeline.pipeline);
+
             rpass.set_bind_group(0, &ctx.global_uniform_binding.binding, &[]);
             rpass.set_bind_group(1, &ctx.camera_binding.bind_group, &[]);
             rpass.draw(0..3, 0..1);
