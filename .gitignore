@@ -1,10 +1,7 @@
 invoke-selis/out/
-invoke-selis/target/
-
-examples/invoke-bonsai/target/
-examples/invoke-triangle/target/
-examples/invoke-xor/target/
+**/target
 
 **/*.rs.bk
+
 .git
 .idea
