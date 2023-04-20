@@ -16,7 +16,7 @@ impl HdrBackBuffer {
                 binding: 0,
                 visibility: wgpu::ShaderStages::COMPUTE,
                 ty: wgpu::BindingType::StorageTexture {
-                    access: wgpu::StorageTextureAccess::ReadWrite,
+                    access: wgpu::StorageTextureAccess::WriteOnly,
                     format: Self::FORMAT,
                     view_dimension: wgpu::TextureViewDimension::D2,
                 },

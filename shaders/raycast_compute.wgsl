@@ -24,9 +24,9 @@ var<uniform> un: Uniform;
 @group(1) @binding(0)
 var<uniform> cam: Camera;
 @group(2) @binding(0)
-var volume: texture_storage_3d<rgba16float, read>;
+var volume: texture_storage_3d<rgba16float, read_write>;
 @group(2) @binding(1)
-var volume_normal: texture_storage_3d<rgba16float, read>;
+var volume_normal: texture_storage_3d<rgba16float, read_write>;
 @group(3) @binding(0)
 var out_tex: texture_storage_2d<rgba16float, write>;
 @group(4) @binding(0)

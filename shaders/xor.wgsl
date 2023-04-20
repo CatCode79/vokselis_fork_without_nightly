@@ -11,9 +11,9 @@ struct Uniform {
 @group(0) @binding(0)
 var<uniform> un: Uniform;
 @group(1) @binding(0)
-var xor_tex: texture_storage_3d<rgba16float, write>;
+var xor_tex: texture_storage_3d<rgba16float, read_write>;
 @group(1) @binding(1)
-var normal_tex: texture_storage_3d<rgba16float, write>;
+var normal_tex: texture_storage_3d<rgba16float, read_write>;
 
 fn hash(h: f32) -> f32 {
     return fract(sin(h) * 43758.5453123);

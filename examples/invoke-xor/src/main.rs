@@ -189,7 +189,7 @@ impl Demo for Xor {
             xor_texture,
             raycast_single,
             raycast_tile,
-            mode: Mode::SinglePass,
+            mode: Mode::Tile,
 
             aligned_offset,
             offset_buffer_bind_group,
