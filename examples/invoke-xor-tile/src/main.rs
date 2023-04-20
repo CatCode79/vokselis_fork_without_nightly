@@ -59,14 +59,8 @@ use invoke_selis::{dispatch_optimal, run, Camera, Context, Demo, HdrBackBuffer};
 
 const TILE_SIZE: u32 = 256;
 
-#[derive(Debug)]
-enum Mode {
-    SinglePass,
-    Tile,
-}
-
 #[repr(C)]
-#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+#[derive(Clone, Copy, Pod, Zeroable)]
 pub struct Offset {
     x: f32,
     y: f32,
@@ -81,9 +75,7 @@ struct TimestampData {
 
 struct Xor {
     xor_texture: xor_compute::XorCompute,
-    raycast_single: raycast::RaycastPipeline,
     raycast_tile: raycast::RaycastPipeline,
-    mode: Mode,
 
     offset_buffer_bind_group: wgpu::BindGroup,
     buffer_len: usize,
@@ -96,11 +88,9 @@ struct Xor {
 
 impl Demo for Xor {
     fn init(ctx: &mut Context) -> Self {
-        let (raycast_single, raycast_tile) = {
+        let raycast_tile = {
             let module_desc = wgpu::include_wgsl!("../../../shaders/raycast_compute.wgsl");
-            let s = raycast::RaycastPipeline::new(&ctx.device, module_desc.clone(), "single");
-            let t = raycast::RaycastPipeline::new(&ctx.device, module_desc, "tile");
-            (s, t)
+            raycast::RaycastPipeline::new(&ctx.device, module_desc, "tile")
         };
 
         let xor_texture = {
@@ -170,8 +160,6 @@ impl Demo for Xor {
             mapped_at_creation: false,
         });
 
-        println!("Change rendering mode on F1");
-
         let mut encoder = ctx
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -187,9 +175,7 @@ impl Demo for Xor {
 
         Self {
             xor_texture,
-            raycast_single,
             raycast_tile,
-            mode: Mode::Tile,
 
             aligned_offset,
             offset_buffer_bind_group,
@@ -218,32 +204,11 @@ impl Demo for Xor {
                     (timestamp_data.end - timestamp_data.start) as f32 * self.timestamp_period;
                 let time_period = std::time::Duration::from_nanos(nanoseconds as _);
                 eprintln!(
-                    "Time on raycast shader: {:?} ({:?})",
-                    time_period, self.mode
+                    "Time on raycast shader: {:?} (tile pass)",
+                    time_period
                 );
             }
             self.timestamp_buffer.unmap();
-        }
-    }
-
-    fn update_input(&mut self, event: winit::event::WindowEvent<'_>) {
-        match event {
-            winit::event::WindowEvent::KeyboardInput {
-                input:
-                    winit::event::KeyboardInput {
-                        state: winit::event::ElementState::Pressed,
-                        virtual_keycode: Some(winit::event::VirtualKeyCode::F1),
-                        ..
-                    },
-                ..
-            } => {
-                self.mode = match self.mode {
-                    Mode::SinglePass => Mode::Tile,
-                    Mode::Tile => Mode::SinglePass,
-                };
-                println!("Switched to: {:?}", self.mode);
-            }
-            _ => {}
         }
     }
 
@@ -260,42 +225,23 @@ impl Demo for Xor {
             label: Some("Raycast Pass"),
         });
 
-        match self.mode {
-            Mode::SinglePass => {
-                cpass.set_pipeline(&self.raycast_single.pipeline);
+        cpass.set_pipeline(&self.raycast_tile.pipeline);
 
-                cpass.set_bind_group(0, &ctx.global_uniform_binding.binding, &[]);
-                cpass.set_bind_group(1, &ctx.camera_binding.bind_group, &[]);
-                cpass.set_bind_group(2, &self.xor_texture.storage_bind_group, &[]);
-                cpass.set_bind_group(3, &ctx.render_backbuffer.storage_bind_group, &[]);
-                cpass.set_bind_group(4, &self.offset_buffer_bind_group, &[0]);
-                let (width, height) = HdrBackBuffer::DEFAULT_RESOLUTION;
-                cpass.dispatch_workgroups(
-                    dispatch_optimal(width, 8),
-                    dispatch_optimal(height, 8),
-                    1,
-                );
-            }
-            Mode::Tile => {
-                cpass.set_pipeline(&self.raycast_tile.pipeline);
-
-                cpass.set_bind_group(0, &ctx.global_uniform_binding.binding, &[]);
-                cpass.set_bind_group(1, &ctx.camera_binding.bind_group, &[]);
-                cpass.set_bind_group(2, &self.xor_texture.storage_bind_group, &[]);
-                cpass.set_bind_group(3, &ctx.render_backbuffer.storage_bind_group, &[]);
-                for offset in 0..self.buffer_len {
-                    cpass.set_bind_group(
-                        4,
-                        &self.offset_buffer_bind_group,
-                        &[offset as u32 * self.aligned_offset],
-                    );
-                    cpass.dispatch_workgroups(
-                        dispatch_optimal(TILE_SIZE, 16),
-                        dispatch_optimal(TILE_SIZE, 16),
-                        1,
-                    );
-                }
-            }
+        cpass.set_bind_group(0, &ctx.global_uniform_binding.binding, &[]);
+        cpass.set_bind_group(1, &ctx.camera_binding.bind_group, &[]);
+        cpass.set_bind_group(2, &self.xor_texture.storage_bind_group, &[]);
+        cpass.set_bind_group(3, &ctx.render_backbuffer.storage_bind_group, &[]);
+        for offset in 0..self.buffer_len {
+            cpass.set_bind_group(
+                4,
+                &self.offset_buffer_bind_group,
+                &[offset as u32 * self.aligned_offset],
+            );
+            cpass.dispatch_workgroups(
+                dispatch_optimal(TILE_SIZE, 16),
+                dispatch_optimal(TILE_SIZE, 16),
+                1,
+            );
         }
         drop(cpass);
 

@@ -722,7 +722,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "invoke-xor"
+name = "invoke-xor-tile"
 version = "0.1.0"
 dependencies = [
  "bytemuck",

@@ -1,5 +1,5 @@
 [package]
-name = "invoke-xor"
+name = "invoke-xor-tile"
 version = "0.1.0"
 edition = "2021"
 authors = ["Alex Komissarov <k.a.komissar@gmail.com>"]
