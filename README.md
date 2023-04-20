@@ -1,2 +1,2 @@
-# invoke-bonsai
-Bonsai example from the repo vokselis
+# invoke-selis
+Examples from the repo [vokselis](https://github.com/pudnax/vokselis) with updated dependencies and without using the Nightly
