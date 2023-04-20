@@ -166,7 +166,7 @@ impl Demo for Xor {
         let timestamp_buffer = ctx.device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Query Buffer"),
             size: std::mem::size_of::<TimestampData>() as _,
-            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::QUERY_RESOLVE,
             mapped_at_creation: false,
         });
 
