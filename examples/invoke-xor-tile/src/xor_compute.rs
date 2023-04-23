@@ -187,6 +187,7 @@ impl<'a> XorCompute {
         'a: 'pass,
     {
         cpass.set_pipeline(&self.pipeline);
+
         cpass.set_bind_group(0, &uniform_bind_group.binding, &[]);
         cpass.set_bind_group(1, &self.storage_bind_group, &[]);
         cpass.dispatch_workgroups(32, 32, 32);

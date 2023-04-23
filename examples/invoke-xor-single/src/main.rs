@@ -58,13 +58,6 @@ use invoke_selis::{dispatch_optimal, run, Camera, Context, Demo, HdrBackBuffer};
 
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
-pub struct Offset {
-    x: f32,
-    y: f32,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Pod, Zeroable)]
 struct TimestampData {
     start: u64,
     end: u64,

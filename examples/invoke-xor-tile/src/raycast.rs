@@ -48,7 +48,7 @@ impl RaycastPipeline {
             let camera_bind_group_layout = device.create_bind_group_layout(&CameraBinding::DESC);
             let volume_bind_group_layout =
                 device.create_bind_group_layout(&xor_compute::XorCompute::DESC_COMPUTE);
-            let output_texture_bind_group_layot =
+            let output_texture_bind_group_layout =
                 device.create_bind_group_layout(&HdrBackBuffer::DESC_COMPUTE);
             let offset_buffer_bind_group = device.create_bind_group_layout(&Self::OFFSET_BUFFER_DESC);
 
@@ -58,7 +58,7 @@ impl RaycastPipeline {
                     &global_bind_group_layout,
                     &camera_bind_group_layout,
                     &volume_bind_group_layout,
-                    &output_texture_bind_group_layot,
+                    &output_texture_bind_group_layout,
                     &offset_buffer_bind_group,
                 ],
                 push_constant_ranges: &[],
