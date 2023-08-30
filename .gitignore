@@ -5,3 +5,4 @@ invoke-selis/out/
 
 .git
 .idea
+Cargo.lock
