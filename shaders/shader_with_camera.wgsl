@@ -24,8 +24,8 @@ struct VertexOutput {
 };
 
 @vertex
-fn vs_main(@builtin(vertex_index) vertex_idx: u32) -> VertexOutput {
-    let vertex_idx = i32(vertex_idx);
+fn vs_main(@builtin(vertex_index) vertex_idx_par: u32) -> VertexOutput {
+    let vertex_idx = i32(vertex_idx_par);
     var res: vec4<f32>;
     if (vertex_idx == 0) {
         res = vec4<f32>(-0.5, -0.5, 0., 1.);

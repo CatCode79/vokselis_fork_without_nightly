@@ -32,8 +32,8 @@ fn noise(x: vec3<f32>) -> f32 {
     );
 }
 
-fn fbm(p: vec3<f32>) -> f32 {
-    var p = p;
+fn fbm(p_par: vec3<f32>) -> f32 {
+    var p = p_par;
     var f = 0.0;
     f = 0.5000 * noise(p);
     p = p * 2.01;
@@ -60,8 +60,8 @@ fn noise_volume(coord: vec3<f32>) -> vec4<f32> {
     return vec4(val, val, val, alpha);
 }
 
-fn gradient(pos: vec3<f32>, eps: f32) -> vec3<f32> {
-    let eps = vec2(eps, 0.);
+fn gradient(pos: vec3<f32>, eps_par: f32) -> vec3<f32> {
+    let eps = vec2(eps_par, 0.);
     let k = mat3x3<f32>(pos, pos, pos) - mat3x3<f32>(eps.xyy, eps.yxy, eps.yyx);
     return normalize(vec3(noise_volume(pos).a) - vec3(noise_volume(k[0]).a, noise_volume(k[1]).a, noise_volume(k[2]).a));
 }
