@@ -51,7 +51,6 @@ mod xor_compute;
 use std::path::PathBuf;
 
 use bytemuck::{Pod, Zeroable};
-use color_eyre::eyre::Result;
 use wgpu::util::DeviceExt as _;
 use winit::{dpi::LogicalSize, event_loop::EventLoopBuilder, window::WindowBuilder};
 
@@ -252,12 +251,13 @@ impl Demo for Xor {
     }
 }
 
-fn main() -> Result<()> {
+fn main() -> Result<(), String> {
     let event_loop = EventLoopBuilder::<(PathBuf, wgpu::ShaderModule)>::with_user_event().build();
     let window = WindowBuilder::new()
         .with_title("Vokselis")
         .with_inner_size(LogicalSize::new(1280, 720))
-        .build(&event_loop)?;
+        .build(&event_loop)
+        .map_err(|e| e.to_string())?;
     let window_size = window.inner_size();
 
     let camera = Camera::new(

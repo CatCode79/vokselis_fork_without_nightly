@@ -45,10 +45,7 @@ clippy::style,
 clippy::suspicious,
 )]
 
-use std::{
-    path::{Path, PathBuf},
-    time::Instant,
-};
+use std::path::PathBuf;
 
 pub mod camera;
 pub mod context;
@@ -58,9 +55,8 @@ pub use camera::{Camera, CameraBinding};
 pub use context::{Context, GlobalUniformBinding, HdrBackBuffer, Uniform, VolumeTexture};
 pub use utils::{dispatch_optimal, NonZeroSized};
 
-use color_eyre::eyre::Result;
 use pollster::FutureExt;
-use utils::{frame_counter::FrameCounter, input::Input, recorder::RecordEvent};
+use utils::{frame_counter::FrameCounter, input::Input};
 use winit::{
     dpi::{PhysicalPosition, PhysicalSize},
     event::{
@@ -70,10 +66,6 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
     window::Window,
 };
-
-const SHADER_FOLDER: &str = "../../shaders";
-const SCREENSHOTS_FOLDER: &str = "screenshots";
-const VIDEO_FOLDER: &str = "recordings";
 
 pub trait Demo: 'static + Sized {
     fn init(ctx: &mut Context) -> Self;
@@ -87,17 +79,10 @@ pub fn run<D: Demo>(
     event_loop: EventLoop<(PathBuf, wgpu::ShaderModule)>,
     window: Window,
     camera: Option<Camera>,
-) -> Result<()> {
-    // Initialize hooks for pretty errors and logging
-    color_eyre::install()?;
+) -> Result<(), String> {
     env_logger::init();
 
     let mut context = Context::new(&window, camera).block_on()?;
-
-    let mut recording_status = false;
-    let recorder = utils::recorder::Recorder::new();
-
-    print_help(context.get_info(), &recorder.ffmpeg_version);
 
     let mut frame_counter = FrameCounter::new();
     let mut input = Input::new();
@@ -145,39 +130,6 @@ pub fn run<D: Demo>(
                         if width != 0 && height != 0 {
                             context.resize(width, height);
                             demo.resize(&context.device, &context.queue, &context.surface_config);
-                        }
-
-                        if recording_status {
-                            println!("Stop recording. Resolution has been changed.",);
-                            recording_status = false;
-                            recorder.send(RecordEvent::Finish);
-                        }
-                    }
-
-                    WindowEvent::KeyboardInput {
-                        input:
-                            KeyboardInput {
-                                state: ElementState::Pressed,
-                                virtual_keycode: Some(keycode),
-                                ..
-                            },
-                        ..
-                    } => {
-                        if VirtualKeyCode::F11 == keycode {
-                            let now = Instant::now();
-                            let frame = context.capture_frame();
-                            eprintln!("Capture image: {:#.2?}", now.elapsed());
-                            recorder.send(RecordEvent::Screenshot(frame));
-                        }
-
-                        if recorder.ffmpeg_installed() && VirtualKeyCode::F12 == keycode {
-                            if !recording_status {
-                                recorder
-                                    .send(RecordEvent::Start(context.capture_image_dimentions()));
-                            } else {
-                                recorder.send(RecordEvent::Finish);
-                            }
-                            recording_status = !recording_status;
                         }
                     }
 
@@ -233,11 +185,6 @@ pub fn run<D: Demo>(
                         window.request_redraw();
                     }
                 }
-
-                if recording_status {
-                    let (frame, _) = context.capture_frame();
-                    recorder.send(RecordEvent::Record(frame));
-                }
             }
             Event::LoopDestroyed => {
                 println!("\n// End from the loop. Bye bye~⏎ ");
@@ -245,30 +192,4 @@ pub fn run<D: Demo>(
             _ => {}
         }
     })
-}
-
-pub fn print_help(info: impl std::fmt::Display, ffmpeg_version: &str) {
-    println!("{}", info);
-    println!("{}", ffmpeg_version);
-    println!(
-        "Default shader path:\n\t{}\n",
-        Path::new(SHADER_FOLDER).canonicalize().unwrap().display()
-    );
-    // println!("\n- `F1`:   Print help");
-    // println!("- `F2`:   Toggle play/pause");
-    // println!("- `F3`:   Pause and step back one frame");
-    // println!("- `F4`:   Pause and step forward one frame");
-    // println!("- `F5`:   Restart playback at frame 0 (`Time` and `Pos` = 0)");
-    // println!("- `F6`:   Print parameters");
-    // println!("- `F7`:   Toggle profiler");
-    // println!("- `F8`:   Switch backend");
-    // println!("- `F10`:  Save shaders");
-    println!("- `F11`:  Take Screenshot");
-    println!("- `F12`:  Start/Stop record video");
-    println!("- `ESC`:  Exit the application");
-    // println!("- `Arrows`: Change `Pos`");
-    println!();
-    println!("// Set up our new world⏎ ");
-    println!("// And let's begin the⏎ ");
-    println!("\tSIMULATION⏎ \n");
 }

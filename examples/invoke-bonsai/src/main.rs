@@ -49,7 +49,6 @@ mod raycast;
 
 use std::path::PathBuf;
 
-use color_eyre::eyre::Result;
 use winit::{dpi::LogicalSize, event_loop::EventLoopBuilder, window::WindowBuilder};
 
 use invoke_selis::{run, Camera, Context, Demo, VolumeTexture};
@@ -106,12 +105,13 @@ impl Demo for Bonsai {
     }
 }
 
-fn main() -> Result<()> {
+fn main() -> Result<(), String> {
     let event_loop = EventLoopBuilder::<(PathBuf, wgpu::ShaderModule)>::with_user_event().build();
     let window = WindowBuilder::new()
         .with_title("Vokselis")
         .with_inner_size(LogicalSize::new(1280, 720))
-        .build(&event_loop)?;
+        .build(&event_loop)
+        .map_err(|e| e.to_string())?;
     let window_size = window.inner_size();
 
     let camera = Camera::new(

@@ -15,6 +15,5 @@ categories = ["graphics", "rendering"]
 invoke-selis = { path = "../../invoke-selis" }
 
 bytemuck = { version = "1.7", features = ["derive"] }
-color-eyre = "0.6"
 wgpu = "0.17"
 winit = "0.28"

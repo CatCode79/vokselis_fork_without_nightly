@@ -1,29 +1,16 @@
 use std::{
     collections::HashMap,
     hash::Hash,
-    io,
     num::NonZeroU64,
     ops::{Deref, DerefMut},
-    path::Path,
 };
 
 pub(crate) mod frame_counter;
 pub(crate) mod input;
-pub(crate) mod recorder;
 
 pub fn dispatch_optimal(len: u32, subgroup_size: u32) -> u32 {
     let padded_size = (subgroup_size - len % subgroup_size) % subgroup_size;
     (len + padded_size) / subgroup_size
-}
-
-pub(crate) fn create_folder<P: AsRef<Path>>(name: P) -> io::Result<()> {
-    match std::fs::create_dir(name) {
-        Ok(_) => {}
-        Err(e) if e.kind() == io::ErrorKind::AlreadyExists => {}
-        Err(e) => return Err(e),
-    }
-
-    Ok(())
 }
 
 pub trait NonZeroSized: Sized {

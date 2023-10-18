@@ -1,6 +1,5 @@
 use std::{sync::Arc, time::Instant};
 
-use color_eyre::eyre::{eyre, Result};
 use winit::{dpi::PhysicalSize, window::Window};
 
 mod global_ubo;
@@ -55,7 +54,7 @@ pub struct Context {
 
 impl Context {
     /// Create a new window with a given `window`
-    pub async fn new(window: &Window, camera: Option<Camera>) -> Result<Self> {
+    pub async fn new(window: &Window, camera: Option<Camera>) -> Result<Self, String> {
         // Create new instance using first-tier backend of WGPU
         // One of Vulkan + Metal + DX12 + Browser WebGPU
         let instance_desc = wgpu::InstanceDescriptor {
@@ -76,7 +75,7 @@ impl Context {
                 compatible_surface: Some(&surface),
             })
             .await
-            .ok_or(eyre!("Failed to create device adapter."))?;
+            .ok_or("Failed to create device adapter.".to_string())?;
 
         // Use default features and limits for your machine
         let features = adapter.features();
@@ -93,7 +92,8 @@ impl Context {
                 },
                 None,
             )
-            .await?;
+            .await
+            .map_err(|e| e.to_string())?;
         let device = Arc::new(device);
 
         let PhysicalSize { width, height } = window.inner_size();

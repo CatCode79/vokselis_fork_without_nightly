@@ -15,12 +15,8 @@ categories = ["graphics", "rendering"]
 
 [dependencies]
 bytemuck = { version = "1.7", features = ["derive"] }
-chrono = "0.4"
-color-eyre = "0.6"
-crossbeam-channel = "0.5"
 env_logger = "0.10"
 glam = { version = "0.24", features = ["bytemuck"] }
-png = "0.17"
 pollster = "0.3"
 wgpu = "0.17"
 winit = "0.28"
