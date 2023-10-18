@@ -1,10 +1,10 @@
+use crate::xor_compute;
+
 use invoke_selis::{
     camera::CameraBinding,
     context::{HdrBackBuffer, Uniform},
     NonZeroSized,
 };
-
-use crate::xor_compute;
 
 pub(crate) struct RaycastPipeline {
     pub(crate) pipeline: wgpu::ComputePipeline,

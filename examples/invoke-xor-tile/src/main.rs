@@ -48,13 +48,13 @@ clippy::suspicious,
 mod raycast;
 mod xor_compute;
 
-use std::path::PathBuf;
+use invoke_selis::{dispatch_optimal, run, Camera, Context, Demo, HdrBackBuffer};
 
 use bytemuck::{Pod, Zeroable};
 use wgpu::util::DeviceExt as _;
 use winit::{dpi::LogicalSize, event_loop::EventLoopBuilder, window::WindowBuilder};
 
-use invoke_selis::{dispatch_optimal, run, Camera, Context, Demo, HdrBackBuffer};
+use std::path::PathBuf;
 
 const TILE_SIZE: u32 = 256;
 

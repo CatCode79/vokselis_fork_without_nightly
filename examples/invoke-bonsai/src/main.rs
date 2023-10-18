@@ -47,12 +47,12 @@ clippy::suspicious,
 
 mod raycast;
 
-use std::path::PathBuf;
+use invoke_selis::{run, Camera, Context, Demo, VolumeTexture};
+use raycast::RaycastPipeline;
 
 use winit::{dpi::LogicalSize, event_loop::EventLoopBuilder, window::WindowBuilder};
 
-use invoke_selis::{run, Camera, Context, Demo, VolumeTexture};
-use raycast::RaycastPipeline;
+use std::path::PathBuf;
 
 struct Bonsai {
     volume_texture: VolumeTexture,

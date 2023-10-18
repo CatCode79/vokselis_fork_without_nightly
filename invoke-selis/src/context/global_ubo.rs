@@ -1,8 +1,9 @@
-use std::time::Duration;
-
 use crate::NonZeroSized;
+
 use bytemuck::{Pod, Zeroable};
 use wgpu::util::DeviceExt;
+
+use std::time::Duration;
 
 pub struct GlobalUniformBinding {
     pub binding: wgpu::BindGroup,
@@ -60,8 +61,6 @@ pub struct Uniform {
     pub time: f32,
     pub time_delta: f32,
     _padding: f32,
-    // pub record_period: f32,
-    // _padding2: [f32; 3],
 }
 
 impl Default for Uniform {
@@ -75,7 +74,6 @@ impl Default for Uniform {
             frame: 0,
             time_delta: 1. / 60.,
             _padding: 0.,
-            // record_period: 10.,
         }
     }
 }
@@ -129,7 +127,6 @@ impl std::fmt::Display for Uniform {
               time delta:\t{:#.3?}, fps: {:#.2?}\n\
               width, height:\t{:?}\nmouse:\t\t{:.2?}\n\
               frame:\t\t{}\n",
-            // record_period:\t{}\n",
             self.pos,
             time,
             time_delta,
@@ -137,7 +134,6 @@ impl std::fmt::Display for Uniform {
             self.resolution,
             self.mouse,
             self.frame,
-            // self.record_period
         )
     }
 }

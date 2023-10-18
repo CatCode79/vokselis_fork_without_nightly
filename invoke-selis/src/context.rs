@@ -1,28 +1,23 @@
-use std::{sync::Arc, time::Instant};
-
-use winit::{dpi::PhysicalSize, window::Window};
-
 mod global_ubo;
 mod hdr_backbuffer;
 #[allow(dead_code)]
 mod pipelines;
 mod present_pipeline;
-mod screenshot;
 mod volume_texture;
-
-pub use hdr_backbuffer::HdrBackBuffer;
-use present_pipeline::PresentPipeline;
 
 pub use global_ubo::GlobalUniformBinding;
 pub use global_ubo::Uniform;
+pub use hdr_backbuffer::HdrBackBuffer;
 pub use volume_texture::VolumeTexture;
-
-use screenshot::ScreenshotCtx;
 
 use crate::utils::frame_counter::FrameCounter;
 use crate::utils::input::Input;
-use crate::utils::ImageDimensions;
 use crate::{Camera, CameraBinding};
+
+use present_pipeline::PresentPipeline;
+use winit::{dpi::PhysicalSize, window::Window};
+
+use std::{sync::Arc, time::Instant};
 
 pub struct Context {
     adapter: wgpu::Adapter,
@@ -31,8 +26,6 @@ pub struct Context {
     surface: wgpu::Surface,
     pub surface_config: wgpu::SurfaceConfiguration,
     pub limits: wgpu::Limits,
-
-    screenshot_ctx: ScreenshotCtx,
 
     pub camera: Camera,
     pub camera_binding: CameraBinding,
@@ -127,12 +120,6 @@ impl Context {
             camera,
             camera_binding: CameraBinding::new(&device),
 
-            screenshot_ctx: ScreenshotCtx::new(
-                &device,
-                surface_config.width,
-                surface_config.height,
-            ),
-
             rgb_texture,
 
             render_backbuffer,
@@ -221,7 +208,6 @@ impl Context {
         self.surface_config.width = width;
         self.surface.configure(&self.device, &self.surface_config);
 
-        self.screenshot_ctx.resize(&self.device, width, height);
         self.rgb_texture = create_rgb_framebuffer(&self.device, &self.surface_config);
 
         self.camera.set_aspect(width, height);
@@ -273,15 +259,6 @@ impl Context {
         frame.present();
 
         Ok(())
-    }
-
-    pub fn capture_frame(&self) -> (Vec<u8>, ImageDimensions) {
-        self.screenshot_ctx
-            .capture_frame(&self.device, &self.queue, &self.rgb_texture)
-    }
-
-    pub fn capture_image_dimentions(&self) -> ImageDimensions {
-        self.screenshot_ctx.image_dimentions
     }
 }
 

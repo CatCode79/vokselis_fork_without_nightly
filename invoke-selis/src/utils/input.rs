@@ -1,10 +1,10 @@
+use crate::context::Uniform;
+
 use winit::{
     dpi::{PhysicalPosition, PhysicalSize},
     event::{ElementState, KeyboardInput, VirtualKeyCode, WindowEvent},
     window::Window,
 };
-
-use crate::context::Uniform;
 
 #[derive(Debug, Default)]
 pub struct Input {

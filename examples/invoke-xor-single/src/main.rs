@@ -48,12 +48,12 @@ clippy::suspicious,
 mod raycast;
 mod xor_compute;
 
-use std::path::PathBuf;
+use invoke_selis::{dispatch_optimal, run, Camera, Context, Demo, HdrBackBuffer};
 
 use bytemuck::{Pod, Zeroable};
 use winit::{dpi::LogicalSize, event_loop::EventLoopBuilder, window::WindowBuilder};
 
-use invoke_selis::{dispatch_optimal, run, Camera, Context, Demo, HdrBackBuffer};
+use std::path::PathBuf;
 
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]

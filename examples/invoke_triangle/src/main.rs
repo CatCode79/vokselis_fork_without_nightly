@@ -45,11 +45,11 @@ clippy::style,
 clippy::suspicious,
 )]
 
-use std::path::PathBuf;
+use invoke_selis::{run, CameraBinding, Context, Demo, Uniform};
 
 use winit::{dpi::LogicalSize, event_loop::EventLoopBuilder, window::WindowBuilder};
 
-use invoke_selis::{run, CameraBinding, Context, Demo, Uniform};
+use std::path::PathBuf;
 
 pub struct BasicPipeline {
     pub pipeline: wgpu::RenderPipeline,

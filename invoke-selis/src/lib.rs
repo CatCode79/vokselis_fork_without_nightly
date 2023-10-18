@@ -45,8 +45,6 @@ clippy::style,
 clippy::suspicious,
 )]
 
-use std::path::PathBuf;
-
 pub mod camera;
 pub mod context;
 mod utils;
@@ -66,6 +64,8 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
     window::Window,
 };
+
+use std::path::PathBuf;
 
 pub trait Demo: 'static + Sized {
     fn init(ctx: &mut Context) -> Self;

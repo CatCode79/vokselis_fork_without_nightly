@@ -1,6 +1,6 @@
-use wgpu::util::DeviceExt as _;
-
 use invoke_selis::{CameraBinding, GlobalUniformBinding, HdrBackBuffer, Uniform};
+
+use wgpu::util::DeviceExt as _;
 
 pub(crate) struct RaycastPipeline {
     pub(crate) pipeline: wgpu::RenderPipeline,
