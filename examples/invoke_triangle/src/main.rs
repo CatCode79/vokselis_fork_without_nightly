@@ -47,6 +47,7 @@ clippy::suspicious,
 
 use invoke_selis::{run, CameraBinding, Context, Demo, Uniform};
 
+use wgpu::StoreOp;
 use winit::{dpi::LogicalSize, event_loop::EventLoopBuilder, window::WindowBuilder};
 
 use std::path::PathBuf;
@@ -126,10 +127,10 @@ impl Demo for BasicTrig {
                     resolve_target: None,
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
-                        store: true,
+                        store: StoreOp::Store,
                     },
                 })],
-                depth_stencil_attachment: None,
+                ..Default::default()
             });
 
             rpass.set_pipeline(&self.pipeline.pipeline);

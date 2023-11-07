@@ -50,6 +50,7 @@ mod raycast;
 use invoke_selis::{run, Camera, Context, Demo, VolumeTexture};
 use raycast::RaycastPipeline;
 
+use wgpu::StoreOp;
 use winit::{dpi::LogicalSize, event_loop::EventLoopBuilder, window::WindowBuilder};
 
 use std::path::PathBuf;
@@ -87,10 +88,10 @@ impl Demo for Bonsai {
                     resolve_target: None,
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
-                        store: true,
+                        store: StoreOp::Store,
                     },
                 })],
-                depth_stencil_attachment: None,
+                ..Default::default()
             });
 
             self.pipeline.record(

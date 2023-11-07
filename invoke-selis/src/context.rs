@@ -15,6 +15,7 @@ use crate::utils::input::Input;
 use crate::{Camera, CameraBinding};
 
 use present_pipeline::PresentPipeline;
+use wgpu::StoreOp;
 use winit::{dpi::PhysicalSize, window::Window};
 
 use std::{sync::Arc, time::Instant};
@@ -52,7 +53,7 @@ impl Context {
         // One of Vulkan + Metal + DX12 + Browser WebGPU
         let instance_desc = wgpu::InstanceDescriptor {
             backends: wgpu::Backends::PRIMARY,
-            dx12_shader_compiler: Default::default(),
+            ..Default::default()
         };
         let instance = wgpu::Instance::new(instance_desc);
 
@@ -232,7 +233,7 @@ impl Context {
                     resolve_target: None,
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
-                        store: true,
+                        store: StoreOp::Store,
                     },
                 }),
                 Some(wgpu::RenderPassColorAttachment {
@@ -240,11 +241,11 @@ impl Context {
                     resolve_target: None,
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
-                        store: true,
+                        store: StoreOp::Store,
                     },
                 }),
             ],
-            depth_stencil_attachment: None,
+            ..Default::default()
         });
 
         self.present_pipeline.record(

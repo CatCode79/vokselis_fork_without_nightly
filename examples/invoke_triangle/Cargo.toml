@@ -14,5 +14,5 @@ categories = ["graphics", "rendering"]
 [dependencies]
 invoke-selis = { path = "../../invoke-selis" }
 
-wgpu = "0.17"
+wgpu = "0.18"
 winit = "0.28"

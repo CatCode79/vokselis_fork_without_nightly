@@ -167,6 +167,7 @@ impl Demo for Xor {
 
         let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
             label: Some("XOR Update Pass"),
+            ..Default::default()
         });
         xor_texture.record(&mut cpass, &ctx.global_uniform_binding);
         drop(cpass);
@@ -222,6 +223,7 @@ impl Demo for Xor {
 
         let mut cpass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
             label: Some("Raycast Pass"),
+            ..Default::default()
         });
 
         cpass.set_pipeline(&self.raycast_tile.pipeline);

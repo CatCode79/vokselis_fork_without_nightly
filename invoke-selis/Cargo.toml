@@ -18,5 +18,5 @@ bytemuck = { version = "1.7", features = ["derive"] }
 env_logger = "0.10"
 glam = { version = "0.24", features = ["bytemuck"] }
 pollster = "0.3"
-wgpu = "0.17"
+wgpu = "0.18"
 winit = "0.28"
