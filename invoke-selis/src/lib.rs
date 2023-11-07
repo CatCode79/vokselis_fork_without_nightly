@@ -58,20 +58,21 @@ use utils::{frame_counter::FrameCounter, input::Input};
 use winit::{
     dpi::{PhysicalPosition, PhysicalSize},
     event::{
-        DeviceEvent, ElementState, Event, KeyboardInput, MouseScrollDelta, VirtualKeyCode,
-        WindowEvent,
+        DeviceEvent, ElementState, Event, KeyEvent, MouseScrollDelta, WindowEvent,
     },
     event_loop::{ControlFlow, EventLoop},
+    keyboard::Key,
     window::Window,
 };
 
 use std::path::PathBuf;
+use winit::keyboard::NamedKey;
 
 pub trait Demo: 'static + Sized {
     fn init(ctx: &mut Context) -> Self;
     fn resize(&mut self, _: &wgpu::Device, _: &wgpu::Queue, _: &wgpu::SurfaceConfiguration) {}
     fn update(&mut self, _: &mut Context) {}
-    fn update_input(&mut self, _: WindowEvent<'_>) {}
+    fn update_input(&mut self, _: WindowEvent) {}
     fn render(&mut self, _: &Context) {}
 }
 
@@ -94,39 +95,54 @@ pub fn run<D: Demo>(
     let mut demo = D::init(&mut context);
 
     let mut main_window_focused = false;
-    event_loop.run(move |event, _, control_flow| {
-        *control_flow = ControlFlow::Wait;
+    event_loop.run(move |event, target| {
+        target.set_control_flow(ControlFlow::Wait);
 
         match event {
-            Event::MainEventsCleared => {
+            Event::AboutToWait => {
                 context.update(&frame_counter, &input);
                 demo.update(&mut context);
                 window.request_redraw();
-            }
-            Event::WindowEvent {
-                event, window_id, ..
-            } if window.id() == window_id => {
-                input.update(&event, &window);
+            },
 
-                match event {
+            Event::WindowEvent {
+                event: window_event, window_id, ..
+            } if window.id() == window_id => {
+                input.update(&window_event, &window);
+
+                match window_event {
                     WindowEvent::Focused(focused) => main_window_focused = focused,
 
                     WindowEvent::CloseRequested
                     | WindowEvent::KeyboardInput {
-                        input:
-                            KeyboardInput {
-                                virtual_keycode: Some(VirtualKeyCode::Escape),
-                                state: ElementState::Pressed,
+                        event:
+                            KeyEvent {
+                                logical_key: Key::Named(NamedKey::Escape),
                                 ..
                             },
                         ..
-                    } => *control_flow = ControlFlow::Exit,
+                    } => target.exit(),
 
-                    WindowEvent::Resized(PhysicalSize { width, height })
-                    | WindowEvent::ScaleFactorChanged {
-                        new_inner_size: &mut PhysicalSize { width, height },
-                        ..
-                    } => {
+                    WindowEvent::RedrawRequested => {
+                        frame_counter.record();
+
+                        demo.render(&context);
+
+                        match context.render() {
+                            Ok(_) => {}
+                            Err(wgpu::SurfaceError::Lost) => {
+                                context.resize(context.width, context.height);
+                                window.request_redraw();
+                            }
+                            Err(wgpu::SurfaceError::OutOfMemory) => target.exit(),
+                            Err(e) => {
+                                eprintln!("{:?}", e);
+                                window.request_redraw();
+                            }
+                        }
+                    }
+
+                    WindowEvent::Resized(PhysicalSize { width, height }) => {
                         if width != 0 && height != 0 {
                             context.resize(width, height);
                             demo.resize(&context.device, &context.queue, &context.surface_config);
@@ -135,7 +151,7 @@ pub fn run<D: Demo>(
 
                     _ => {}
                 }
-                demo.update_input(event);
+                demo.update_input(window_event);
             }
 
             Event::DeviceEvent { ref event, .. } if main_window_focused => match event {
@@ -168,28 +184,7 @@ pub fn run<D: Demo>(
                 _ => (),
             },
 
-            Event::RedrawRequested(_) => {
-                frame_counter.record();
-
-                demo.render(&context);
-
-                match context.render() {
-                    Ok(_) => {}
-                    Err(wgpu::SurfaceError::Lost) => {
-                        context.resize(context.width, context.height);
-                        window.request_redraw();
-                    }
-                    Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
-                    Err(e) => {
-                        eprintln!("{:?}", e);
-                        window.request_redraw();
-                    }
-                }
-            }
-            Event::LoopDestroyed => {
-                println!("\n// End from the loop. Bye bye~⏎ ");
-            }
             _ => {}
         }
-    })
+    }).map_err(|err| err.to_string())
 }

@@ -145,7 +145,7 @@ impl Demo for BasicTrig {
 }
 
 fn main() -> Result<(), String> {
-    let event_loop = EventLoopBuilder::<(PathBuf, wgpu::ShaderModule)>::with_user_event().build();
+    let event_loop = EventLoopBuilder::<(PathBuf, wgpu::ShaderModule)>::with_user_event().build().map_err(|e| e.to_string())?;
     let window = WindowBuilder::new()
         .with_title("Vokselis")
         .with_inner_size(LogicalSize::new(1280, 720))

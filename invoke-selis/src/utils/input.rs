@@ -2,7 +2,8 @@ use crate::context::Uniform;
 
 use winit::{
     dpi::{PhysicalPosition, PhysicalSize},
-    event::{ElementState, KeyboardInput, VirtualKeyCode, WindowEvent},
+    event::{ElementState, KeyEvent, WindowEvent},
+    keyboard::{KeyCode, PhysicalKey},
     window::Window,
 };
 
@@ -25,41 +26,41 @@ impl Input {
         Default::default()
     }
 
-    pub fn update(&mut self, event: &WindowEvent<'_>, window: &Window) -> bool {
+    pub fn update(&mut self, event: &WindowEvent, window: &Window) -> bool {
         match event {
             WindowEvent::KeyboardInput {
-                input:
-                    KeyboardInput {
-                        virtual_keycode: Some(keycode),
+                event:
+                    KeyEvent {
+                        physical_key,
                         state,
                         ..
                     },
                 ..
             } => {
                 let pressed = state == &ElementState::Pressed;
-                match keycode {
-                    VirtualKeyCode::Up => {
+                match physical_key {
+                    PhysicalKey::Code(KeyCode::ArrowUp) => {
                         self.up_pressed = pressed;
                     }
-                    VirtualKeyCode::Down => {
+                    PhysicalKey::Code(KeyCode::ArrowDown) => {
                         self.down_pressed = pressed;
                     }
-                    VirtualKeyCode::Left => {
+                    PhysicalKey::Code(KeyCode::ArrowLeft) => {
                         self.left_pressed = pressed;
                     }
-                    VirtualKeyCode::Right => {
+                    PhysicalKey::Code(KeyCode::ArrowRight) => {
                         self.right_pressed = pressed;
                     }
-                    VirtualKeyCode::Slash => {
+                    PhysicalKey::Code(KeyCode::Slash) => {
                         self.slash_pressed = pressed;
                     }
-                    VirtualKeyCode::RShift => {
+                    PhysicalKey::Code(KeyCode::ShiftRight) => {
                         self.right_shift_pressed = pressed;
                     }
-                    VirtualKeyCode::Return => {
+                    PhysicalKey::Code(KeyCode::Enter) => {
                         self.enter_pressed = pressed;
                     }
-                    VirtualKeyCode::Space => {
+                    PhysicalKey::Code(KeyCode::Space) => {
                         self.space_pressed = pressed;
                     }
                     _ => return false,
@@ -80,7 +81,7 @@ impl Input {
                 ..
             } => self.left_mouse_pressed = matches!(state, ElementState::Pressed),
 
-            _ => {}
+            _ => { }
         }
         true
     }
