@@ -186,5 +186,5 @@ pub fn run<D: Demo>(
 
             _ => {}
         }
-    }).map_err(|err| err.to_string())
+    }).map_err(|e| e.to_string())
 }
