@@ -45,83 +45,44 @@ clippy::style,
 clippy::suspicious,
 )]
 
-use invoke_selis::{run, CameraBinding, Context, Demo, Uniform};
+mod raycast;
+
+use vokselis::{run, Camera, Context, Demo, VolumeTexture};
+use raycast::RaycastPipeline;
 
 use wgpu::StoreOp;
 use winit::{dpi::LogicalSize, event_loop::EventLoopBuilder, window::WindowBuilder};
 
 use std::path::PathBuf;
 
-pub struct BasicPipeline {
-    pub pipeline: wgpu::RenderPipeline,
+struct Bonsai {
+    volume_texture: VolumeTexture,
+    pipeline: RaycastPipeline,
 }
 
-impl BasicPipeline {
-    pub fn new(
-        device: &wgpu::Device,
-        surface_format: wgpu::TextureFormat,
-        module_desc: wgpu::ShaderModuleDescriptor<'_>,
-    ) -> Self {
-        let layout = {
-            let global_bind_group_layout = device.create_bind_group_layout(&Uniform::DESC);
-            let camera_bind_group_layout = device.create_bind_group_layout(&CameraBinding::DESC);
-            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                label: Some("Screen Pass Layout"),
-                bind_group_layouts: &[&global_bind_group_layout, &camera_bind_group_layout],
-                push_constant_ranges: &[],
-            })
+impl Demo for Bonsai {
+    fn init(ctx: &mut Context) -> Self {
+        let volume_texture = VolumeTexture::new(&ctx.device, &ctx.queue);
+        let pipeline = {
+            let module_desc = wgpu::include_wgsl!("../../../shaders/raycast_naive.wgsl");
+            RaycastPipeline::new(&ctx.device, module_desc)
         };
-        let module = device.create_shader_module(module_desc);
-
-        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: Some("Render with Camera Pipeline"),
-            layout: Some(&layout),
-            fragment: Some(wgpu::FragmentState {
-                module: &module,
-                entry_point: "fs_main",
-                targets: &[Some(surface_format.into())],
-            }),
-            vertex: wgpu::VertexState {
-                module: &module,
-                entry_point: "vs_main",
-                buffers: &[],
-            },
-            primitive: wgpu::PrimitiveState::default(),
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState::default(),
-            multiview: None,
-        });
-
         Self {
+            volume_texture,
             pipeline,
         }
-    }
-}
-
-struct BasicTrig {
-    pipeline: BasicPipeline,
-}
-
-impl Demo for BasicTrig {
-    fn init(ctx: &mut Context) -> Self {
-        let pipeline = BasicPipeline::new(
-            &ctx.device,
-            ctx.render_backbuffer.format(),
-            wgpu::include_wgsl!("../../../shaders/shader_with_camera.wgsl"),
-        );
-        Self { pipeline }
     }
 
     fn render(&mut self, ctx: &Context) {
         let mut encoder = ctx
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("Trig Encoder"),
+                label: Some("Volume Encoder"),
             });
 
         {
             let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: Some("Trig Pass"),
+                label: Some("Volume Pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: &ctx.render_backbuffer.texture_view,
                     resolve_target: None,
@@ -133,11 +94,12 @@ impl Demo for BasicTrig {
                 ..Default::default()
             });
 
-            rpass.set_pipeline(&self.pipeline.pipeline);
-
-            rpass.set_bind_group(0, &ctx.global_uniform_binding.binding, &[]);
-            rpass.set_bind_group(1, &ctx.camera_binding.bind_group, &[]);
-            rpass.draw(0..3, 0..1);
+            self.pipeline.record(
+                &mut rpass,
+                &ctx.global_uniform_binding,
+                &ctx.camera_binding,
+                &self.volume_texture.bind_group,
+            );
         }
 
         ctx.queue.submit(Some(encoder.finish()));
@@ -151,6 +113,14 @@ fn main() -> Result<(), String> {
         .with_inner_size(LogicalSize::new(1280, 720))
         .build(&event_loop)
         .map_err(|e| e.to_string())?;
+    let window_size = window.inner_size();
 
-    run::<BasicTrig>(event_loop, window, None)
+    let camera = Camera::new(
+        1.,
+        0.5,
+        1.,
+        (0.5, 0.5, 0.5).into(),
+        window_size.width as f32 / window_size.height as f32,
+    );
+    run::<Bonsai>(event_loop, window, Some(camera))
 }

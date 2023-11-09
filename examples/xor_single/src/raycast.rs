@@ -1,9 +1,8 @@
 use crate::xor_compute;
 
-use invoke_selis::{
+use vokselis::{
     camera::CameraBinding,
     context::{HdrBackBuffer, Uniform},
-    NonZeroSized,
 };
 
 pub(crate) struct RaycastPipeline {
@@ -11,21 +10,6 @@ pub(crate) struct RaycastPipeline {
 }
 
 impl RaycastPipeline {
-    pub(crate) const OFFSET_BUFFER_DESC: wgpu::BindGroupLayoutDescriptor<'static> =
-        wgpu::BindGroupLayoutDescriptor {
-            label: Some("Offset Buffer Bind Group Layout"),
-            entries: &[wgpu::BindGroupLayoutEntry {
-                binding: 0,
-                visibility: wgpu::ShaderStages::COMPUTE,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Storage { read_only: true },
-                    has_dynamic_offset: true,
-                    min_binding_size: Some(crate::Offset::SIZE),
-                },
-                count: None,
-            }],
-        };
-
     pub(crate) fn new(
         device: &wgpu::Device,
         module_desc: wgpu::ShaderModuleDescriptor<'_>,
@@ -50,7 +34,6 @@ impl RaycastPipeline {
                 device.create_bind_group_layout(&xor_compute::XorCompute::DESC_COMPUTE);
             let output_texture_bind_group_layout =
                 device.create_bind_group_layout(&HdrBackBuffer::DESC_COMPUTE);
-            let offset_buffer_bind_group = device.create_bind_group_layout(&Self::OFFSET_BUFFER_DESC);
 
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Compute Raycast Pass Layout"),
@@ -59,7 +42,6 @@ impl RaycastPipeline {
                     &camera_bind_group_layout,
                     &volume_bind_group_layout,
                     &output_texture_bind_group_layout,
-                    &offset_buffer_bind_group,
                 ],
                 push_constant_ranges: &[],
             })

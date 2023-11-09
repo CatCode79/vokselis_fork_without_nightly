@@ -1,4 +1,4 @@
-use invoke_selis::{GlobalUniformBinding, Uniform};
+use vokselis::{GlobalUniformBinding, Uniform};
 
 pub(crate) struct XorCompute {
     pipeline: wgpu::ComputePipeline,

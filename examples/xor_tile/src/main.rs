@@ -48,12 +48,22 @@ clippy::suspicious,
 mod raycast;
 mod xor_compute;
 
-use invoke_selis::{dispatch_optimal, run, Camera, Context, Demo, HdrBackBuffer};
+use vokselis::{dispatch_optimal, run, Camera, Context, Demo, HdrBackBuffer};
 
 use bytemuck::{Pod, Zeroable};
+use wgpu::util::DeviceExt as _;
 use winit::{dpi::LogicalSize, event_loop::EventLoopBuilder, window::WindowBuilder};
 
 use std::path::PathBuf;
+
+const TILE_SIZE: u32 = 256;
+
+#[repr(C)]
+#[derive(Clone, Copy, Pod, Zeroable)]
+pub struct Offset {
+    x: f32,
+    y: f32,
+}
 
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
@@ -64,7 +74,11 @@ struct TimestampData {
 
 struct Xor {
     xor_texture: xor_compute::XorCompute,
-    raycast_single: raycast::RaycastPipeline,
+    raycast_tile: raycast::RaycastPipeline,
+
+    offset_buffer_bind_group: wgpu::BindGroup,
+    buffer_len: usize,
+    aligned_offset: u32,
 
     timestamp: wgpu::QuerySet,
     timestamp_period: f32,
@@ -73,14 +87,61 @@ struct Xor {
 
 impl Demo for Xor {
     fn init(ctx: &mut Context) -> Self {
-        let raycast_single = {
+        let raycast_tile = {
             let module_desc = wgpu::include_wgsl!("../../../shaders/raycast_compute.wgsl");
-            raycast::RaycastPipeline::new(&ctx.device, module_desc.clone(), "single")
+            raycast::RaycastPipeline::new(&ctx.device, module_desc, "tile")
         };
 
         let xor_texture = {
             let shader_module_desc = wgpu::include_wgsl!("../../../shaders/xor.wgsl");
             xor_compute::XorCompute::new(&ctx.device, shader_module_desc)
+        };
+
+        let padding = {
+            let min_align = ctx.limits.min_storage_buffer_offset_alignment;
+            (min_align - std::mem::size_of::<Offset>() as u32 % min_align) % min_align
+        };
+        let offsets = {
+            let mut res = vec![];
+            let (w, h) = HdrBackBuffer::DEFAULT_RESOLUTION;
+            for y in 0..((h / TILE_SIZE) + 1) {
+                for x in 0..((w / TILE_SIZE) + 1) {
+                    res.extend(bytemuck::bytes_of(&Offset {
+                        x: (x * TILE_SIZE) as f32,
+                        y: (y * TILE_SIZE) as f32,
+                    }));
+                    res.extend(std::iter::repeat(0).take(padding as _));
+                }
+            }
+            res
+        };
+        let aligned_offset = std::mem::size_of::<Offset>() as u32 + padding;
+        let buffer_len = offsets.len() / aligned_offset as usize;
+
+        let offset_buffer_bind_group = {
+            let offset_buffer = ctx
+                .device
+                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("Offsets Buffer"),
+                    contents: bytemuck::cast_slice(&offsets),
+                    usage: wgpu::BufferUsages::STORAGE,
+                });
+            let offset_buffer_bind_group_layout = ctx
+                .device
+                .create_bind_group_layout(&raycast::RaycastPipeline::OFFSET_BUFFER_DESC);
+            let offset_buffer_bind_group_desc = wgpu::BindGroupDescriptor {
+                label: Some("Offset Buffer Bind Group"),
+                layout: &offset_buffer_bind_group_layout,
+                entries: &[wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                        buffer: &offset_buffer,
+                        offset: 0,
+                        size: wgpu::BufferSize::new(std::mem::size_of::<Offset>() as _),
+                    }),
+                }],
+            };
+            ctx.device.create_bind_group(&offset_buffer_bind_group_desc)
         };
 
         let timestamp = ctx.device.create_query_set(&wgpu::QuerySetDescriptor {
@@ -114,7 +175,11 @@ impl Demo for Xor {
 
         Self {
             xor_texture,
-            raycast_single,
+            raycast_tile,
+
+            aligned_offset,
+            offset_buffer_bind_group,
+            buffer_len,
 
             timestamp,
             timestamp_period,
@@ -139,7 +204,7 @@ impl Demo for Xor {
                     (timestamp_data.end - timestamp_data.start) as f32 * self.timestamp_period;
                 let time_period = std::time::Duration::from_nanos(nanoseconds as _);
                 eprintln!(
-                    "Time on raycast shader: {:?} (single pass)",
+                    "Time on raycast shader: {:?} (tile pass)",
                     time_period
                 );
             }
@@ -161,18 +226,24 @@ impl Demo for Xor {
             ..Default::default()
         });
 
-        cpass.set_pipeline(&self.raycast_single.pipeline);
+        cpass.set_pipeline(&self.raycast_tile.pipeline);
 
         cpass.set_bind_group(0, &ctx.global_uniform_binding.binding, &[]);
         cpass.set_bind_group(1, &ctx.camera_binding.bind_group, &[]);
         cpass.set_bind_group(2, &self.xor_texture.storage_bind_group, &[]);
         cpass.set_bind_group(3, &ctx.render_backbuffer.storage_bind_group, &[]);
-        let (width, height) = HdrBackBuffer::DEFAULT_RESOLUTION;
-        cpass.dispatch_workgroups(
-            dispatch_optimal(width, 8),
-            dispatch_optimal(height, 8),
-            1,
-        );
+        for offset in 0..self.buffer_len {
+            cpass.set_bind_group(
+                4,
+                &self.offset_buffer_bind_group,
+                &[offset as u32 * self.aligned_offset],
+            );
+            cpass.dispatch_workgroups(
+                dispatch_optimal(TILE_SIZE, 16),
+                dispatch_optimal(TILE_SIZE, 16),
+                1,
+            );
+        }
         drop(cpass);
 
         encoder.write_timestamp(&self.timestamp, 1);

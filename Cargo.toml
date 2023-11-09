@@ -1,5 +1,18 @@
+[workspace]
+members = [
+    "examples/bonsai",
+    "examples/triangle",
+    "examples/xor_single",
+    "examples/xor_tile",
+]
+
+[workspace.dependencies]
+bytemuck = { version = "1.7", features = ["derive"] }
+wgpu = "0.18"
+winit = { version = "0.29", default-features = false, features = ["rwh_05", "x11", "wayland", "wayland-dlopen"] }
+
 [package]
-name = "invoke-selis"
+name = "vokselis"
 version = "0.1.0"
 edition = "2021"
 authors = ["Alex Komissarov <k.a.komissar@gmail.com>"]
@@ -14,9 +27,9 @@ categories = ["graphics", "rendering"]
 [lib]
 
 [dependencies]
-bytemuck = { version = "1.7", features = ["derive"] }
+bytemuck = { workspace = true }
 env_logger = "0.10"
 glam = { version = "0.24", features = ["bytemuck"] }
 pollster = "0.3"
-wgpu = "0.18"
-winit = { version = "0.29", default-features = false, features = ["rwh_05", "x11", "wayland", "wayland-dlopen"] }
+wgpu = { workspace = true }
+winit = { workspace = true }

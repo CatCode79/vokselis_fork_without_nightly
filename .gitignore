@@ -1,4 +1,4 @@
-invoke-selis/out/
+vokselis_fork_without_nightly/out/
 **/target
 
 **/*.rs.bk

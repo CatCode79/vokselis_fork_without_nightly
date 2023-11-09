@@ -114,7 +114,7 @@ impl Context {
         let render_backbuffer = HdrBackBuffer::new(&device, HdrBackBuffer::DEFAULT_RESOLUTION);
         let rgb_texture = create_rgb_framebuffer(&device, &surface_config);
 
-        let present_shader = wgpu::include_wgsl!("../../shaders/present.wgsl");
+        let present_shader = wgpu::include_wgsl!("../shaders/present.wgsl");
         let present_pipeline = PresentPipeline::new(&device, surface_format, present_shader);
 
         Ok(Self {

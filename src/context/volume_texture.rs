@@ -28,7 +28,7 @@ impl VolumeTexture {
     };
 
     pub fn new(device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
-        let data = include_bytes!("../../../bonsai_256x256x256_uint8.raw");
+        let data = include_bytes!("../../assets/bonsai_256x256x256_uint8.raw");
         let size = wgpu::Extent3d {
             width: 256,
             height: 256,
